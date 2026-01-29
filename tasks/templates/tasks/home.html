@@ -2,271 +2,327 @@
 
 {% block content %}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-0">Tablero de Tareas</h1>
-            <p class="text-muted">Objetivos estratégicos de {{ request.user.username|title }}</p>
-        </div>
-        
-        <div>
-            <a href="{% url 'exportar_csv' %}" class="btn btn-outline-success me-2 shadow-sm" title="Descargar Reporte">
-                📥 Excel
-            </a>
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-dark me-2 shadow-sm">
-                📊 Estadísticas
-            </a>
-            <a href="{% url 'crear_tarea' %}" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-lg"></i> + Nueva Tarea
-            </a>
-        </div>
-    </div>
+<style>
+    .hover-elite { transition: all 0.2s ease-in-out; border-left: 4px solid transparent; }
+    .hover-elite:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; border-left: 4px solid #0d6efd; }
+    
+    /* Scrollbar táctico para la bitácora */
+    .bitacora-scroll::-webkit-scrollbar { width: 6px; }
+    .bitacora-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+    .bitacora-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .bitacora-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
 
-    <div class="card mb-4 shadow-sm bg-light border-0">
-        <div class="card-body p-3">
-            <form method="GET" class="row g-3">
-                <div class="col-12">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">🔍</span>
-                        <input type="text" name="search" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Buscar operación por título...">
-                        <button class="btn btn-dark" type="submit">Buscar</button>
-                    </div>
+    /* Estilo de filtros activos */
+    .btn-group .btn.active { font-weight: bold; border-width: 2px; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-0 fw-bold"><i class="bi bi-kanban me-2"></i>Tablero de Tareas</h1>
+        <p class="text-muted mb-0">Objetivos estratégicos de <span class="text-dark fw-bold">{{ request.user.username|title }}</span></p>
+    </div>
+    
+    <div>
+        <a href="{% url 'exportar_csv' %}" class="btn btn-outline-success me-2 shadow-sm fw-bold">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-dark me-2 shadow-sm fw-bold">
+            <i class="bi bi-graph-up"></i> Estadísticas
+        </a>
+        <a href="{% url 'crear_tarea' %}" class="btn btn-primary shadow-sm fw-bold px-4">
+            <i class="bi bi-plus-lg"></i> Nueva Tarea
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm bg-light border-0">
+    <div class="card-body p-3">
+        <form method="GET" class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Buscar operación por título...">
+                    <button class="btn btn-dark" type="submit">Buscar</button>
+                </div>
+            </div>
+
+            <div class="col-md-7 d-flex flex-wrap justify-content-end align-items-center gap-2">
+                <div class="btn-group btn-group-sm shadow-sm" role="group">
+                    <a href="?filter=&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-secondary {% if status_filter == '' %}active bg-secondary text-white{% endif %}">Todas</a>
+                    <a href="?filter=PENDIENTE&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-warning text-dark {% if status_filter == 'PENDIENTE' %}active bg-warning{% endif %}">Pendientes</a>
+                    <a href="?filter=EN_PROCESO&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-primary {% if status_filter == 'EN_PROCESO' %}active bg-primary text-white{% endif %}">En Proceso</a>
+                    <a href="?filter=COMPLETADA&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-success {% if status_filter == 'COMPLETADA' %}active bg-success text-white{% endif %}">Completadas</a>
                 </div>
 
-                <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div class="btn-group btn-group-sm" role="group">
-                        <a href="?filter=&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-secondary {% if status_filter == '' %}active{% endif %}">Todas</a>
-                        <a href="?filter=PENDIENTE&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-warning text-dark {% if status_filter == 'PENDIENTE' %}active{% endif %}">Pendientes</a>
-                        <a href="?filter=EN_PROCESO&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-primary {% if status_filter == 'EN_PROCESO' %}active{% endif %}">En Proceso</a>
-                        <a href="?filter=COMPLETADA&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-success {% if status_filter == 'COMPLETADA' %}active{% endif %}">Completadas</a>
-                    </div>
-
-                    <div class="btn-group btn-group-sm" role="group">
-                        <a href="?ownership=&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == '' %}active{% endif %}">🌐 General</a>
-                        <a href="?ownership=mis_tareas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'mis_tareas' %}active{% endif %}">👤 Solo Mías</a>
-                        <a href="?ownership=compartidas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'compartidas' %}active{% endif %}">🤝 Compartidas</a>
-                    </div>
+                <div class="btn-group btn-group-sm shadow-sm" role="group">
+                    <a href="?ownership=&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == '' %}active bg-dark text-white{% endif %}">🌐 General</a>
+                    <a href="?ownership=mis_tareas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'mis_tareas' %}active bg-dark text-white{% endif %}">👤 Solo Mías</a>
+                    <a href="?ownership=compartidas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'compartidas' %}active bg-dark text-white{% endif %}">🤝 Compartidas</a>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="list-group list-group-flush">
-        {% for mision in misiones %}
-            <div class="list-group-item p-3 mb-2 border rounded shadow-sm hover-effect">
-                <div class="d-flex w-100 justify-content-between align-items-start">
-                    
-                    <div>
-                        <h5 class="mb-1 fw-bold">{{ mision.titulo }}</h5>
+<div class="list-group list-group-flush">
+    {% for mision in misiones %}
+        <div id="mision-{{ mision.id }}" class="list-group-item p-3 mb-3 border rounded shadow-sm hover-elite bg-white position-relative">
+            
+            <div class="d-flex w-100 justify-content-between align-items-start">
+                
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-1">
+                        <h5 class="mb-0 fw-bold text-dark me-2">{{ mision.titulo }}</h5>
                         
-                        <div class="mb-2">
-                            {% for tag in mision.etiquetas.all %}
-                                <span class="badge {{ tag.color }} rounded-pill border border-light" style="font-size: 0.7rem;">
-                                    {{ tag.nombre }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                        <small class="{% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}text-danger fw-bold{% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}text-warning fw-bold{% else %}text-success fw-bold{% endif %}">
-                            📅 
-                            {% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}⛔ ¡VENCIDA! {{ mision.fecha_objetivo|date:"d M Y" }}
-                            {% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}⚠️ VENCE HOY
-                            {% else %}🟢 {{ mision.fecha_objetivo|date:"d M Y" }}
+                        {% for tag in mision.etiquetas.all %}
+                            <span class="badge {{ tag.color }} rounded-pill border border-light me-1" style="font-size: 0.65rem;">
+                                {{ tag.nombre }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-2 d-flex align-items-center flex-wrap gap-2">
+                        <small class="{% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}text-danger fw-bold{% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}text-warning fw-bold{% else %}text-muted fw-bold{% endif %} border px-2 rounded bg-light">
+                            {% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}
+                                <i class="bi bi-exclamation-octagon-fill"></i> VENCIDA: {{ mision.fecha_objetivo|date:"d M" }}
+                            {% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}
+                                <i class="bi bi-exclamation-triangle-fill"></i> VENCE HOY
+                            {% else %}
+                                <i class="bi bi-calendar-event"></i> {{ mision.fecha_objetivo|date:"d M Y" }}
                             {% endif %}
                         </small>
 
                         {% if mision.usuario == request.user or request.user in mision.compartida_con.all %}
-                            <div class="btn-group ms-2">
-                                <button type="button" class="btn btn-sm dropdown-toggle text-white 
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm dropdown-toggle text-white py-0 px-2 rounded-pill shadow-sm 
                                     {% if mision.estado == 'COMPLETADA' %}bg-success
                                     {% elif mision.estado == 'EN_PROCESO' %}bg-primary
                                     {% elif mision.estado == 'CANCELADA' %}bg-secondary
                                     {% else %}bg-warning text-dark{% endif %}" 
-                                    data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: bold; font-size: 0.8rem;">
-                                    
-                                    {% if mision.estado == 'PENDIENTE' %}Pendiente{% endif %}
-                                    {% if mision.estado == 'EN_PROCESO' %}En Proceso{% endif %}
-                                    {% if mision.estado == 'COMPLETADA' %}Completada{% endif %}
-                                    {% if mision.estado == 'CANCELADA' %}Cancelada{% endif %}
+                                    data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: bold; font-size: 0.75rem;">
+                                    {{ mision.get_estado_display }}
                                 </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'PENDIENTE' %}">🟡 Pendiente</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'EN_PROCESO' %}">🔵 En Proceso</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'COMPLETADA' %}">🟢 Completada</a></li>
+                                <ul class="dropdown-menu shadow">
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'PENDIENTE' %}"><i class="bi bi-circle text-warning me-2"></i>Pendiente</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'EN_PROCESO' %}"><i class="bi bi-play-circle text-primary me-2"></i>En Proceso</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'COMPLETADA' %}"><i class="bi bi-check-circle text-success me-2"></i>Completada</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="{% url 'cambiar_estado' mision.id 'CANCELADA' %}">⚫ Cancelada</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'cambiar_estado' mision.id 'CANCELADA' %}"><i class="bi bi-x-circle me-2"></i>Cancelada</a></li>
                                 </ul>
                             </div>
                         {% else %}
-                            {% if mision.estado == 'COMPLETADA' %}
-                                <span class="badge bg-success ms-2">Completada</span>
-                            {% elif mision.estado == 'EN_PROCESO' %}
-                                <span class="badge bg-primary ms-2">En Proceso</span>
-                            {% elif mision.estado == 'CANCELADA' %}
-                                <span class="badge bg-secondary ms-2">Cancelada</span>
-                            {% else %}
-                                <span class="badge bg-warning text-dark ms-2">Pendiente</span>
-                            {% endif %}
+                            <span class="badge bg-secondary rounded-pill">{{ mision.get_estado_display }}</span>
                         {% endif %}
-                        
+
                         {% if mision.usuario != request.user %}
-                            <span class="badge bg-info text-dark ms-2">👤 De: {{ mision.usuario.username }}</span>
+                            <span class="badge bg-light text-dark border"><i class="bi bi-person-circle text-muted me-1"></i>{{ mision.usuario.username }}</span>
                         {% endif %}
                     </div>
 
-                    <div class="text-end">
-                        <button type="button" class="btn btn-sm btn-outline-info mb-2" data-bs-toggle="modal" data-bs-target="#modal{{ mision.id }}">👁️ Ver</button>
-                        <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-sm btn-outline-success mb-2">📝 Reportar</a>
-                        {% if mision.usuario == request.user %}
-                            <div>
-                                <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-sm btn-outline-primary" title="Editar">✏️</a>
-                                <a href="{% url 'eliminar_tarea' mision.id %}" class="btn btn-sm btn-outline-danger" title="Borrar">🗑️</a>
+                    {% if mision.descripcion %}
+                        <p class="mb-1 text-secondary small text-truncate" style="max-width: 80%;">
+                            <i class="bi bi-card-text me-1"></i>{{ mision.descripcion }}
+                        </p>
+                    {% endif %}
+
+                    <div class="mt-2 pt-2 border-top">
+                        <small class="fw-bold text-muted" style="font-size: 0.7rem;">Últimos movimientos:</small>
+                        {% for log in mision.historial.all|slice:":2" %} 
+                            <div class="d-flex text-muted mt-1 align-items-center">
+                                <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" style="width: 20px; height: 20px; object-fit: cover;" alt="Avatar">
+                                <small class="small lh-sm text-truncate" style="max-width: 90%;">
+                                    <span class="text-dark fw-bold">@{{ log.usuario.username }}</span>: {{ log.comentario|truncatechars:60 }}
+                                    {% if log.archivo %}<i class="bi bi-paperclip text-primary ms-1"></i>{% endif %}
+                                </small>
                             </div>
-                        {% endif %}
+                        {% empty %}
+                            <small class="text-muted d-block fst-italic ms-1" style="font-size: 0.7rem;">Sin reportes.</small>
+                        {% endfor %}
                     </div>
                 </div>
-                
-                {% if mision.descripcion %}
-                    <p class="mb-1 mt-2 text-secondary small">
-                        <span class="fw-bold text-primary">Detalle:</span> {{ mision.descripcion|truncatechars:100 }}
-                    </p>
-                {% endif %}
 
-                <div class="mt-2 pt-2 border-top">
-                    <small class="fw-bold text-muted">Últimos movimientos:</small>
-                    {% for log in mision.historial.all|slice:":2" %} 
-                        <div class="d-flex text-muted mt-2 align-items-center">
-                            <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" style="width: 25px; height: 25px; object-fit: cover;" alt="Avatar">
-                            <small class="small lh-sm w-100">
-                                <span class="text-dark fw-bold">@{{ log.usuario.username }}</span>: {{ log.comentario|truncatechars:60 }}
-                                {% if log.archivo %}<span class="text-primary ms-1">📎</span>{% endif %}
-                            </small>
+                <div class="text-end ms-2" style="min-width: 140px;">
+                    <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modal{{ mision.id }}">
+                        <i class="bi bi-eye"></i> Ver Detalle
+                    </button>
+                    <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-sm btn-outline-success w-100 mb-2">
+                        <i class="bi bi-pencil-square"></i> Reportar
+                    </a>
+                    
+                    {% if mision.usuario == request.user %}
+                        <div class="btn-group w-100">
+                            <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'eliminar_tarea' mision.id %}" class="btn btn-sm btn-outline-danger" title="Borrar"><i class="bi bi-trash"></i></a>
                         </div>
-                    {% empty %}
-                        <small class="text-muted d-block fst-italic">Sin reportes.</small>
-                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
-            <div class="modal fade" id="modal{{ mision.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header bg-light">
-                            <h5 class="modal-title fw-bold">🔎 {{ mision.titulo }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal fade" id="modal{{ mision.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content shadow-lg border-0">
+                    
+                    <div class="modal-header bg-light border-bottom-0">
+                        <h5 class="modal-title fw-bold text-primary">
+                            <i class="bi bi-search me-2"></i>{{ mision.titulo }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body px-4">
+                        
+                        <div class="mb-3">
+                            {% for tag in mision.etiquetas.all %}
+                                <span class="badge {{ tag.color }} rounded-pill border border-light shadow-sm">{{ tag.nombre }}</span>
+                            {% endfor %}
                         </div>
 
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                {% for tag in mision.etiquetas.all %}
-                                    <span class="badge {{ tag.color }} rounded-pill">{{ tag.nombre }}</span>
-                                {% endfor %}
+                        <div class="row mb-4 p-3 bg-white border rounded shadow-sm mx-1">
+                            <div class="col-md-6 border-end">
+                                <p class="mb-2"><i class="bi bi-calendar-check text-success me-2"></i><strong>Objetivo:</strong> {{ mision.fecha_objetivo|date:"d/m/Y" }}</p>
+                                <p class="mb-2"><i class="bi bi-flag-checkered text-danger me-2"></i><strong>Cierre:</strong> {{ mision.fecha_cierre|default:"--" }}</p>
+                                <p class="mb-0"><i class="bi bi-person-badge text-primary me-2"></i><strong>Creador:</strong> {{ mision.usuario.username }}</p>
                             </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <p class="mb-1"><strong>📅 Fecha Objetivo:</strong> {{ mision.fecha_objetivo|date:"d/m/Y" }}</p>
-                                    <p class="mb-1"><strong>🏁 Fecha Cierre:</strong> {{ mision.fecha_cierre|default:"--" }}</p>
-                                    <p class="mb-1"><strong>👤 Creador:</strong> {{ mision.usuario.username }}</p>
-                                </div>
-                                <div class="col-md-6 text-end">
-                                    <p class="mb-1"><strong>Estado:</strong> {{ mision.get_estado_display }}</p>
-                                    <p class="mb-1"><strong>Avance General:</strong> {{ mision.avance|default:"0%" }}</p>
-                                </div>
+                            <div class="col-md-6 ps-4">
+                                <p class="mb-2"><strong>Estado Actual:</strong> 
+                                    <span class="badge {% if mision.estado == 'COMPLETADA' %}bg-success{% elif mision.estado == 'EN_PROCESO' %}bg-primary{% else %}bg-warning text-dark{% endif %}">
+                                        {{ mision.get_estado_display }}
+                                    </span>
+                                </p>
+                                <p class="mb-0"><strong>Avance:</strong> 
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ mision.avance|default:'0'|slice:':-1' }}%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ mision.avance|default:"0%" }}</div>
+                                    </div>
+                                </p>
                             </div>
-                            <hr>
+                        </div>
 
-                            <div class="mb-3">
-                                <h6 class="fw-bold text-primary">📝 Descripción</h6>
-                                <div class="bg-light p-3 rounded text-secondary">{{ mision.descripcion|linebreaks|default:"Sin descripción." }}</div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-secondary text-uppercase small"><i class="bi bi-justify-left me-1"></i>Descripción de la Misión</h6>
+                            <div class="bg-light p-3 rounded border-start border-4 border-primary text-secondary">
+                                {{ mision.descripcion|linebreaks|default:"Sin descripción detallada." }}
                             </div>
+                        </div>
 
-                            {% if mision.observaciones %}
-                            <div class="mb-3">
-                                <h6 class="fw-bold text-success">📋 Observaciones Finales</h6>
-                                <div class="p-2 border rounded text-secondary">{{ mision.observaciones|linebreaks }}</div>
+                        {% if mision.observaciones %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-success text-uppercase small"><i class="bi bi-check-all me-1"></i>Observaciones Finales</h6>
+                            <div class="p-3 border rounded bg-success-subtle text-success-emphasis">
+                                {{ mision.observaciones|linebreaks }}
                             </div>
-                            {% endif %}
+                        </div>
+                        {% endif %}
 
-                            <div class="mb-3">
-                                <h6 class="fw-bold text-dark">👥 Compartida con:</h6>
-                                {% for user in mision.compartida_con.all %}
-                                    <span class="badge bg-secondary">{{ user.username }}</span>
-                                {% empty %}
-                                    <small class="text-muted">Nadie (Tarea privada)</small>
-                                {% endfor %}
-                            </div>
-                            <hr>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark text-uppercase small"><i class="bi bi-people-fill me-1"></i>Equipo Asignado</h6>
+                            {% for user in mision.compartida_con.all %}
+                                <span class="badge bg-secondary me-1"><i class="bi bi-person me-1"></i>{{ user.username }}</span>
+                            {% empty %}
+                                <small class="text-muted fst-italic">Misión individual (Privada)</small>
+                            {% endfor %}
+                        </div>
 
-                            <h6 class="fw-bold">📜 Bitácora de Operaciones</h6>
-                            <div class="bg-light p-3 rounded border" style="max-height: 250px; overflow-y: auto;">
-                                {% for log in mision.historial.all %}
-                                    <div class="mb-2 pb-2 border-bottom">
+                        <h6 class="fw-bold text-dark text-uppercase small mt-4"><i class="bi bi-journal-text me-1 text-warning"></i>Bitácora de Operaciones</h6>
+                        <div class="bg-light p-3 rounded border bitacora-scroll" style="max-height: 300px; overflow-y: auto;">
+                            {% for log in mision.historial.all %}
+                                <div class="d-flex mb-3">
+                                    <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle border border-2 border-white shadow-sm me-3" style="width: 40px; height: 40px; object-fit: cover;" alt="Avatar">
+                                    <div class="w-100">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <div class="d-flex align-items-center">
-                                                <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" style="width: 32px; height: 32px; object-fit: cover;" alt="Avatar">
-                                                <strong class="text-primary">@{{ log.usuario.username }}</strong>
-                                            </div>
-                                            <small class="text-muted">{{ log.fecha|date:"d/m/Y H:i" }}</small>
+                                            <strong class="text-primary">@{{ log.usuario.username }}</strong>
+                                            <small class="text-muted" style="font-size: 0.75rem;">{{ log.fecha|date:"d/m/Y H:i" }}</small>
                                         </div>
-                                        <p class="mb-0 small text-dark ms-5">{{ log.comentario }}</p>
-                                        
+                                        <div class="bg-white p-2 rounded border mt-1 shadow-sm position-relative">
+                                            <p class="mb-0 small text-dark">{{ log.comentario }}</p>
+                                            <div style="position: absolute; top: 10px; left: -6px; width: 10px; height: 10px; background: white; transform: rotate(45deg); border-left: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;"></div>
+                                        </div>
                                         {% if log.archivo %}
-                                            <div class="ms-5 mt-1">
-                                                <a href="{{ log.archivo.url }}" target="_blank" class="badge bg-secondary text-decoration-none">📎 Ver Archivo Adjunto</a>
-                                            </div>
+                                            <a href="{{ log.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1 py-0" style="font-size: 0.75rem;">
+                                                <i class="bi bi-paperclip"></i> Ver Archivo
+                                            </a>
                                         {% endif %}
                                     </div>
-                                {% empty %}
-                                    <p class="text-muted fst-italic text-center">No hay reportes registrados.</p>
-                                {% endfor %}
-                            </div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-4 text-muted opacity-75">
+                                    <i class="bi bi-chat-square-quote display-6"></i>
+                                    <p class="mt-2 small">Sin actividad registrada en la bitácora.</p>
+                                </div>
+                            {% endfor %}
                         </div>
 
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                            <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-success">📝 Agregar Reporte</a>
-                            {% if mision.usuario == request.user %}
-                                <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-primary">Editar Tarea</a>
-                            {% endif %}
-                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light border-top-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-success fw-bold">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar Reporte
+                        </a>
+                        {% if mision.usuario == request.user %}
+                            <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-primary fw-bold">
+                                <i class="bi bi-pencil me-1"></i> Editar
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-
+        </div>
         {% empty %}
-            <div class="text-center py-5">
-                <h3 class="text-muted">Sin Tareas activas</h3>
-                <p>El tablero está limpio.</p>
-            </div>
-        {% endfor %}
-    </div>
+        <div class="text-center py-5">
+            <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-clipboard-check"></i></div>
+            <h3 class="text-muted fw-bold">Sin Tareas Activas</h3>
+            <p class="text-muted">El tablero está limpio, Comandante.</p>
+            <a href="{% url 'crear_tarea' %}" class="btn btn-primary mt-3">Crear Primera Misión</a>
+        </div>
+    {% endfor %}
+</div>
 
-    {% if misiones.has_other_pages %}
-        <nav aria-label="Navegación de misiones" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if misiones.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ misiones.previous_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">&laquo; Anterior</a></li>
-                {% else %}
-                    <li class="page-item disabled"><span class="page-link">&laquo; Anterior</span></li>
+{% if misiones.has_other_pages %}
+    <nav aria-label="Navegación de misiones" class="mt-5 mb-5">
+        <ul class="pagination justify-content-center pagination-sm">
+            {% if misiones.has_previous %}
+                <li class="page-item"><a class="page-link text-dark" href="?page={{ misiones.previous_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">&laquo; Anterior</a></li>
+            {% endif %}
+
+            {% for num in misiones.paginator.page_range %}
+                {% if misiones.number == num %}
+                    <li class="page-item active"><span class="page-link bg-dark border-dark">{{ num }}</span></li>
+                {% elif num > misiones.number|add:'-3' and num < misiones.number|add:'3' %}
+                    <li class="page-item"><a class="page-link text-dark" href="?page={{ num }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">{{ num }}</a></li>
                 {% endif %}
+            {% endfor %}
 
-                {% for num in misiones.paginator.page_range %}
-                    {% if misiones.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num > misiones.number|add:'-3' and num < misiones.number|add:'3' %}
-                        <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">{{ num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if misiones.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ misiones.next_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">Siguiente &raquo;</a></li>
-                {% else %}
-                    <li class="page-item disabled"><span class="page-link">Siguiente &raquo;</span></li>
-                {% endif %}
-            </ul>
-        </nav>
+            {% if misiones.has_next %}
+                <li class="page-item"><a class="page-link text-dark" href="?page={{ misiones.next_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">Siguiente &raquo;</a></li>
+            {% endif %}
+        </ul>
         <div class="text-center text-muted small mt-2">
             Mostrando {{ misiones.start_index }} - {{ misiones.end_index }} de {{ misiones.paginator.count }} operaciones
         </div>
-    {% endif %}
+    </nav>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function (modal) {
+            modal.addEventListener('hide.bs.modal', function (event) {
+                // Al cerrar, enfocar suavemente la tarea en la lista si es necesario
+                var misionId = modal.id.replace('modal', 'mision-');
+                var element = document.getElementById(misionId);
+                if(element) {
+                    // Opcional: añadir un destello visual para saber dónde volvimos
+                    element.style.transition = "background-color 0.5s";
+                    var originalBg = element.style.backgroundColor;
+                    element.style.backgroundColor = "#e8f0fe"; // Azul muy suave
+                    setTimeout(function(){
+                        element.style.backgroundColor = originalBg;
+                    }, 500);
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock content %}

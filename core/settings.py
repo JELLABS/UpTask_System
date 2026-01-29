@@ -140,8 +140,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ... al final del archivo ...
 
 # A dónde ir después de loguearse (si no iba a una url específica)
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'dashboard'
 
 # A dónde ir después de salir (LOGOUT)
 # Lo mandamos de vuelta al login para que se identifique de nuevo
 LOGOUT_REDIRECT_URL = 'login'
+
+LOGIN_URL = 'login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

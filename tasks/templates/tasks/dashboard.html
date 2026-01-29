@@ -1,92 +1,163 @@
 {% extends 'tasks/main.html' %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="mb-0">Estado de Tareas</h1>
-        <p class="text-muted">Métricas de rendimiento de {{ request.user.username|title }}</p>
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">📊 Panel de Control</h2>
+        <p class="text-muted">Inteligencia visual de operaciones en tiempo real</p>
     </div>
-    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
-        ⬅️ Volver al Tablero
-    </a>
 </div>
 
-<div class="row">
-    
-    <div class="col-md-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-white fw-bold">Distribución de Tareas</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark border-0 shadow h-100">
+            <div class="card-body position-relative overflow-hidden">
+                <h6 class="text-uppercase fw-bold opacity-75">Pendientes</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ total_pendientes }}</h1>
+                <i class="bi bi-exclamation-triangle position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white border-0 shadow h-100">
+            <div class="card-body position-relative overflow-hidden">
+                <h6 class="text-uppercase fw-bold opacity-75">En Progreso</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ total_proceso }}</h1>
+                <i class="bi bi-gear-wide-connected position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white border-0 shadow h-100">
+            <div class="card-body position-relative overflow-hidden">
+                <h6 class="text-uppercase fw-bold opacity-75 text-dark">En Revisión</h6>
+                <h1 class="display-4 fw-bold mb-0 text-dark">{{ total_revision }}</h1>
+                <i class="bi bi-eye position-absolute end-0 bottom-0 m-2 opacity-25 text-dark" style="font-size: 4rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white border-0 shadow h-100">
+            <div class="card-body position-relative overflow-hidden">
+                <h6 class="text-uppercase fw-bold opacity-75">Completadas</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ total_completadas }}</h1>
+                <i class="bi bi-check-circle position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white fw-bold">
+                🎯 Estado de las tareas
+            </div>
             <div class="card-body">
                 <canvas id="estadoChart"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-white fw-bold">Estadísticas Clave</div>
+    <div class="col-md-6 mb-3">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white fw-bold">
+                🏷️ Carga por Categoría (Top 5)
+            </div>
             <div class="card-body">
-                <h2 class="display-4 text-center mb-4 fw-bold">{{ total_general }} <small class="fs-6 text-muted">Tareas Totales</small></h2>
-                
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>🟡 Pendientes</span>
-                        <span class="badge bg-warning text-dark rounded-pill">{{ total_pendientes }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>🔵 En Proceso</span>
-                        <span class="badge bg-primary rounded-pill">{{ total_proceso }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>🟢 Completadas</span>
-                        <span class="badge bg-success rounded-pill">{{ total_completadas }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>⚫ Canceladas</span>
-                        <span class="badge bg-secondary rounded-pill">{{ total_canceladas }}</span>
-                    </li>
-                </ul>
+                {% if etiqueta_nombres %}
+                    <canvas id="etiquetaChart"></canvas>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-tags display-4"></i>
+                        <p class="mt-2">Sin datos de etiquetas aún.</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body text-center p-4">
+                <h5 class="fw-bold">📋 Ver Tablero Completo</h5>
+                <a href="{% url 'home' %}" class="btn btn-outline-dark w-100 mt-2 stretched-link">Ir al Tablero</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body text-center p-4">
+                <h5 class="fw-bold">🚀 Iniciar Nueva Tarea</h5>
+                <a href="{% url 'crear_tarea' %}" class="btn btn-success w-100 mt-2 stretched-link">+ Crear Tarea</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    const ctx = document.getElementById('estadoChart').getContext('2d');
-    
-    const estadoChart = new Chart(ctx, {
-        type: 'doughnut', // Tipo de gráfico: 'doughnut', 'pie', 'bar'
+    // --- 1. GRÁFICO DE ESTADOS (DONA) ---
+    const ctxEstado = document.getElementById('estadoChart').getContext('2d');
+    new Chart(ctxEstado, {
+        type: 'doughnut',
         data: {
-            labels: ['Pendientes', 'En Proceso', 'Completadas', 'Canceladas'],
+            labels: ['Pendiente', 'En Espera', 'En Proceso', 'En Revisión', 'Completada'],
             datasets: [{
-                label: 'Cantidad de Tareas',
                 data: [
                     {{ total_pendientes }}, 
+                    {{ total_espera }},
                     {{ total_proceso }}, 
-                    {{ total_completadas }}, 
-                    {{ total_canceladas }}
+                    {{ total_revision }},
+                    {{ total_completadas }}
                 ],
                 backgroundColor: [
                     '#ffc107', // Amarillo (Pendiente)
+                    '#6c757d', // Gris (Espera)
                     '#0d6efd', // Azul (Proceso)
-                    '#198754', // Verde (Completada)
-                    '#6c757d'  // Gris (Cancelada)
+                    '#0dcaf0', // Celeste (Revisión)
+                    '#198754'  // Verde (Completada)
                 ],
-                hoverOffset: 4
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
+
+    // --- 2. GRÁFICO DE ETIQUETAS (BARRAS) ---
+    {% if etiqueta_nombres %}
+    const ctxEtiqueta = document.getElementById('etiquetaChart').getContext('2d');
+    new Chart(ctxEtiqueta, {
+        type: 'bar',
+        data: {
+            labels: {{ etiqueta_nombres|safe }},
+            datasets: [{
+                label: 'Cantidad de Misiones',
+                data: {{ etiqueta_cantidades|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Azul transparente
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+    {% endif %}
 </script>
 
 {% endblock content %}

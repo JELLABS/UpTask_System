@@ -7,19 +7,17 @@ from django.dispatch import receiver
 # 1. NUEVO MODELO: ETIQUETA (Marcadores de Terreno)
 # ======================================================
 class Etiqueta(models.Model):
-    COLORES = [
-        ('bg-primary', 'Azul (Estratégico)'),
-        ('bg-secondary', 'Gris (General)'),
-        ('bg-success', 'Verde (Logística/Ventas)'),
-        ('bg-danger', 'Rojo (Crítico/Urgente)'),
-        ('bg-warning text-dark', 'Amarillo (Alerta)'),
-        ('bg-info text-dark', 'Celeste (Inteligencia)'),
-        ('bg-dark', 'Negro (Operaciones Especiales)'),
-    ]
-    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='etiquetas')
     nombre = models.CharField(max_length=50)
-    color = models.CharField(max_length=50, choices=COLORES, default='bg-secondary')
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE) # Cada general tiene sus propias etiquetas
+    color = models.CharField(max_length=20, default='bg-primary', choices=[
+        ('bg-primary', 'Azul'),
+        ('bg-secondary', 'Gris'),
+        ('bg-success', 'Verde'),
+        ('bg-danger', 'Rojo'),
+        ('bg-warning text-dark', 'Amarillo'),
+        ('bg-info text-dark', 'Celeste'),
+        ('bg-dark', 'Negro'),
+    ])
 
     def __str__(self):
         return self.nombre
@@ -28,50 +26,31 @@ class Etiqueta(models.Model):
 # 2. MODELO TAREA (Operación Principal)
 # ======================================================
 class Tarea(models.Model):
-    ESTADOS_OPCIONES = [
+    ESTADOS = [
         ('PENDIENTE', 'Pendiente'),
-        ('EN_PROCESO', 'En Proceso'),
+        ('EN_ESPERA', 'En Espera'),
+        ('EN_PROCESO', 'En Progreso'),
+        ('EN_REVISION', 'En Revisión'),
         ('COMPLETADA', 'Completada'),
-        ('CANCELADA', 'Cancelada'),
     ]
 
-    # Relaciones
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mis_tareas')
-
-    # Campos Básicos
-    titulo = models.CharField(max_length=200, verbose_name="Título de la Tarea")
-    descripcion = models.TextField(blank=True, verbose_name="Descripción")
-
-    # Fechas
-    fecha_objetivo = models.DateField(verbose_name="Fecha Límite (Objetivo)")
-    fecha_cierre = models.DateField(null=True, blank=True, verbose_name="Fecha Real de Cierre")
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_objetivo = models.DateField()
+    fecha_cierre = models.DateField(null=True, blank=True)
     
-    # Progreso
-    avance = models.CharField(max_length=100, blank=True, verbose_name="Reporte de Avance")
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='PENDIENTE')
     
-    estado = models.CharField(
-        max_length=20, 
-        choices=ESTADOS_OPCIONES, 
-        default='PENDIENTE'
-    )
+    avance = models.CharField(max_length=100, blank=True, help_text="Ej: 50%, En validación...")
+    observaciones = models.TextField(blank=True)
 
-    # --- CAMPO FALTANTE AGREGADO ---
-    # Relación Muchos a Muchos con Etiquetas
-    etiquetas = models.ManyToManyField(Etiqueta, blank=True, related_name='tareas', verbose_name="Etiquetas")
-    # -------------------------------
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tareas_creadas')
+    compartida_con = models.ManyToManyField(User, related_name='tareas_asignadas', blank=True)
+    etiquetas = models.ManyToManyField(Etiqueta, blank=True)
 
-    # Colaboración
-    compartida_con = models.ManyToManyField(
-        User, 
-        related_name='tareas_compartidas', 
-        blank=True,
-        verbose_name="Compartir con"
-    )
-
-    # Auditoría
-    observaciones = models.TextField(blank=True, verbose_name="Observaciones Finales")
-    creado = models.DateTimeField(auto_now_add=True)
-    actualizado = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.titulo
 
     class Meta:
         ordering = ['fecha_objetivo']
@@ -86,25 +65,19 @@ class HistorialAvance(models.Model):
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='historial')
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     comentario = models.TextField()
-    
-    # Archivos Adjuntos (Opción A)
-    archivo = models.FileField(upload_to='adjuntos_tareas/', null=True, blank=True)
-    
+    archivo = models.FileField(upload_to='archivos_adjuntos', blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-fecha']
-
     def __str__(self):
-        return f"{self.usuario.username} - {self.tarea.titulo}"
+        return f"{self.usuario.username} - {self.fecha.strftime('%d/%m %H:%M')}"
 
 # ======================================================
 # 4. PERFIL DE USUARIO (Identidad)
 # ======================================================
 class Perfil(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
-    imagen = models.ImageField(default='default.jpg', upload_to='perfiles_fotos')
-
+    imagen = models.ImageField(upload_to='perfiles_fotos', default='default.jpg')
+    
     def __str__(self):
         return f'Perfil de {self.usuario.username}'
 
