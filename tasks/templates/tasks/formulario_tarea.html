@@ -1,0 +1,89 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">{{ titulo_pagina }}</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Título de la Misión</label>
+                        {{ form.titulo }}
+                        {% if form.titulo.errors %}
+                            <div class="text-danger small">{{ form.titulo.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción / Detalles</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">📅 Fecha Límite</label>
+                            {{ form.fecha_objetivo }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Estado Actual</label>
+                            {{ form.estado }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">🏷️ Etiquetas (Marcadores)</label>
+                        <div class="p-3 bg-light border rounded">
+                            {% if form.etiquetas.field.queryset.count > 0 %}
+                                {{ form.etiquetas }}
+                            {% else %}
+                                <p class="text-muted small mb-0">
+                                    ⚠️ No tiene etiquetas creadas. 
+                                    <a href="/admin/tasks/etiqueta/add/" target="_blank">Cree algunas aquí</a> y recargue la página.
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="form-text small">Marque todas las que correspondan.</div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Reporte de Avance (Opcional)</label>
+                            {{ form.avance }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">👥 Compartir Misión con:</label>
+                            {{ form.compartida_con }}
+                            <div class="form-text">Mantenga presionado "Ctrl" para seleccionar varios.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Observaciones Finales</label>
+                        {{ form.observaciones }}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Guardar Misión</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,272 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0">Tablero de Tareas</h1>
+            <p class="text-muted">Objetivos estratégicos de {{ request.user.username|title }}</p>
+        </div>
+        
+        <div>
+            <a href="{% url 'exportar_csv' %}" class="btn btn-outline-success me-2 shadow-sm" title="Descargar Reporte">
+                📥 Excel
+            </a>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-dark me-2 shadow-sm">
+                📊 Estadísticas
+            </a>
+            <a href="{% url 'crear_tarea' %}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg"></i> + Nueva Tarea
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm bg-light border-0">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-3">
+                <div class="col-12">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">🔍</span>
+                        <input type="text" name="search" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Buscar operación por título...">
+                        <button class="btn btn-dark" type="submit">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="?filter=&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-secondary {% if status_filter == '' %}active{% endif %}">Todas</a>
+                        <a href="?filter=PENDIENTE&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-warning text-dark {% if status_filter == 'PENDIENTE' %}active{% endif %}">Pendientes</a>
+                        <a href="?filter=EN_PROCESO&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-primary {% if status_filter == 'EN_PROCESO' %}active{% endif %}">En Proceso</a>
+                        <a href="?filter=COMPLETADA&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-success {% if status_filter == 'COMPLETADA' %}active{% endif %}">Completadas</a>
+                    </div>
+
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="?ownership=&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == '' %}active{% endif %}">🌐 General</a>
+                        <a href="?ownership=mis_tareas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'mis_tareas' %}active{% endif %}">👤 Solo Mías</a>
+                        <a href="?ownership=compartidas&search={{ search_query }}&filter={{ status_filter }}" class="btn btn-outline-dark {% if ownership_filter == 'compartidas' %}active{% endif %}">🤝 Compartidas</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="list-group list-group-flush">
+        {% for mision in misiones %}
+            <div class="list-group-item p-3 mb-2 border rounded shadow-sm hover-effect">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    
+                    <div>
+                        <h5 class="mb-1 fw-bold">{{ mision.titulo }}</h5>
+                        
+                        <div class="mb-2">
+                            {% for tag in mision.etiquetas.all %}
+                                <span class="badge {{ tag.color }} rounded-pill border border-light" style="font-size: 0.7rem;">
+                                    {{ tag.nombre }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        <small class="{% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}text-danger fw-bold{% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}text-warning fw-bold{% else %}text-success fw-bold{% endif %}">
+                            📅 
+                            {% if mision.fecha_objetivo < hoy and mision.estado != 'COMPLETADA' %}⛔ ¡VENCIDA! {{ mision.fecha_objetivo|date:"d M Y" }}
+                            {% elif mision.fecha_objetivo == hoy and mision.estado != 'COMPLETADA' %}⚠️ VENCE HOY
+                            {% else %}🟢 {{ mision.fecha_objetivo|date:"d M Y" }}
+                            {% endif %}
+                        </small>
+
+                        {% if mision.usuario == request.user or request.user in mision.compartida_con.all %}
+                            <div class="btn-group ms-2">
+                                <button type="button" class="btn btn-sm dropdown-toggle text-white 
+                                    {% if mision.estado == 'COMPLETADA' %}bg-success
+                                    {% elif mision.estado == 'EN_PROCESO' %}bg-primary
+                                    {% elif mision.estado == 'CANCELADA' %}bg-secondary
+                                    {% else %}bg-warning text-dark{% endif %}" 
+                                    data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: bold; font-size: 0.8rem;">
+                                    
+                                    {% if mision.estado == 'PENDIENTE' %}Pendiente{% endif %}
+                                    {% if mision.estado == 'EN_PROCESO' %}En Proceso{% endif %}
+                                    {% if mision.estado == 'COMPLETADA' %}Completada{% endif %}
+                                    {% if mision.estado == 'CANCELADA' %}Cancelada{% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'PENDIENTE' %}">🟡 Pendiente</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'EN_PROCESO' %}">🔵 En Proceso</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'cambiar_estado' mision.id 'COMPLETADA' %}">🟢 Completada</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'cambiar_estado' mision.id 'CANCELADA' %}">⚫ Cancelada</a></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            {% if mision.estado == 'COMPLETADA' %}
+                                <span class="badge bg-success ms-2">Completada</span>
+                            {% elif mision.estado == 'EN_PROCESO' %}
+                                <span class="badge bg-primary ms-2">En Proceso</span>
+                            {% elif mision.estado == 'CANCELADA' %}
+                                <span class="badge bg-secondary ms-2">Cancelada</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if mision.usuario != request.user %}
+                            <span class="badge bg-info text-dark ms-2">👤 De: {{ mision.usuario.username }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-info mb-2" data-bs-toggle="modal" data-bs-target="#modal{{ mision.id }}">👁️ Ver</button>
+                        <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-sm btn-outline-success mb-2">📝 Reportar</a>
+                        {% if mision.usuario == request.user %}
+                            <div>
+                                <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-sm btn-outline-primary" title="Editar">✏️</a>
+                                <a href="{% url 'eliminar_tarea' mision.id %}" class="btn btn-sm btn-outline-danger" title="Borrar">🗑️</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if mision.descripcion %}
+                    <p class="mb-1 mt-2 text-secondary small">
+                        <span class="fw-bold text-primary">Detalle:</span> {{ mision.descripcion|truncatechars:100 }}
+                    </p>
+                {% endif %}
+
+                <div class="mt-2 pt-2 border-top">
+                    <small class="fw-bold text-muted">Últimos movimientos:</small>
+                    {% for log in mision.historial.all|slice:":2" %} 
+                        <div class="d-flex text-muted mt-2 align-items-center">
+                            <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" style="width: 25px; height: 25px; object-fit: cover;" alt="Avatar">
+                            <small class="small lh-sm w-100">
+                                <span class="text-dark fw-bold">@{{ log.usuario.username }}</span>: {{ log.comentario|truncatechars:60 }}
+                                {% if log.archivo %}<span class="text-primary ms-1">📎</span>{% endif %}
+                            </small>
+                        </div>
+                    {% empty %}
+                        <small class="text-muted d-block fst-italic">Sin reportes.</small>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal{{ mision.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold">🔎 {{ mision.titulo }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                {% for tag in mision.etiquetas.all %}
+                                    <span class="badge {{ tag.color }} rounded-pill">{{ tag.nombre }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>📅 Fecha Objetivo:</strong> {{ mision.fecha_objetivo|date:"d/m/Y" }}</p>
+                                    <p class="mb-1"><strong>🏁 Fecha Cierre:</strong> {{ mision.fecha_cierre|default:"--" }}</p>
+                                    <p class="mb-1"><strong>👤 Creador:</strong> {{ mision.usuario.username }}</p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <p class="mb-1"><strong>Estado:</strong> {{ mision.get_estado_display }}</p>
+                                    <p class="mb-1"><strong>Avance General:</strong> {{ mision.avance|default:"0%" }}</p>
+                                </div>
+                            </div>
+                            <hr>
+
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary">📝 Descripción</h6>
+                                <div class="bg-light p-3 rounded text-secondary">{{ mision.descripcion|linebreaks|default:"Sin descripción." }}</div>
+                            </div>
+
+                            {% if mision.observaciones %}
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-success">📋 Observaciones Finales</h6>
+                                <div class="p-2 border rounded text-secondary">{{ mision.observaciones|linebreaks }}</div>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-dark">👥 Compartida con:</h6>
+                                {% for user in mision.compartida_con.all %}
+                                    <span class="badge bg-secondary">{{ user.username }}</span>
+                                {% empty %}
+                                    <small class="text-muted">Nadie (Misión privada)</small>
+                                {% endfor %}
+                            </div>
+                            <hr>
+
+                            <h6 class="fw-bold">📜 Bitácora de Operaciones</h6>
+                            <div class="bg-light p-3 rounded border" style="max-height: 250px; overflow-y: auto;">
+                                {% for log in mision.historial.all %}
+                                    <div class="mb-2 pb-2 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ log.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" style="width: 32px; height: 32px; object-fit: cover;" alt="Avatar">
+                                                <strong class="text-primary">@{{ log.usuario.username }}</strong>
+                                            </div>
+                                            <small class="text-muted">{{ log.fecha|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                        <p class="mb-0 small text-dark ms-5">{{ log.comentario }}</p>
+                                        
+                                        {% if log.archivo %}
+                                            <div class="ms-5 mt-1">
+                                                <a href="{{ log.archivo.url }}" target="_blank" class="badge bg-secondary text-decoration-none">📎 Ver Archivo Adjunto</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% empty %}
+                                    <p class="text-muted fst-italic text-center">No hay reportes registrados.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <a href="{% url 'reportar_avance' mision.id %}" class="btn btn-success">📝 Agregar Reporte</a>
+                            {% if mision.usuario == request.user %}
+                                <a href="{% url 'editar_tarea' mision.id %}" class="btn btn-primary">Editar Tarea</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% empty %}
+            <div class="text-center py-5">
+                <h3 class="text-muted">Sin Tareas activas</h3>
+                <p>El tablero está limpio, Comandante.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if misiones.has_other_pages %}
+        <nav aria-label="Navegación de misiones" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if misiones.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ misiones.previous_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">&laquo; Anterior</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo; Anterior</span></li>
+                {% endif %}
+
+                {% for num in misiones.paginator.page_range %}
+                    {% if misiones.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > misiones.number|add:'-3' and num < misiones.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if misiones.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ misiones.next_page_number }}&search={{ search_query }}&filter={{ status_filter }}&ownership={{ ownership_filter }}">Siguiente &raquo;</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Siguiente &raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted small mt-2">
+            Mostrando {{ misiones.start_index }} - {{ misiones.end_index }} de {{ misiones.paginator.count }} operaciones
+        </div>
+    {% endif %}
+
+{% endblock content %}

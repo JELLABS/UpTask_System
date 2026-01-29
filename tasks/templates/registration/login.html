@@ -1,0 +1,40 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white text-center">
+                <h3 class="mb-0">Iniciar Sesión</h3>
+                <p class="small mb-0">Ingrese sus credenciales para acceder al sistema.</p>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Usuario</label>
+                        <input type="text" name="username" class="form-control" placeholder="Ingrese su usuario" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña</label>
+                        <input type="password" name="password" class="form-contrsignupol" placeholder="********" required>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </div>
+                </form>
+
+            </div>
+            <div class="card-footer text-center bg-light">
+                <small>¿Aún no tiene credenciales? <a href="{% url 'signup' %}">Registrarse aquí</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

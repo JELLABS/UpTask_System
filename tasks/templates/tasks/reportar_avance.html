@@ -1,0 +1,36 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Reportar en: "{{ tarea.titulo }}"</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Comentario / Bitácora</label>
+                        {{ form.comentario }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">📎 Adjuntar Archivo (Opcional)</label>
+                        {{ form.archivo }}
+                        <div class="form-text">Puede subir imágenes, PDFs o documentos Excel.</div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Guardar Reporte</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

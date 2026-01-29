@@ -1,0 +1,44 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white text-center">
+                <h4 class="mb-0">Crear Cuenta</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ field.label }}</label>
+                            <div class="form-control-plaintext border rounded p-2">
+                                {{ field }}
+                            </div>
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success">Confirmar Registro</button>
+                    </div>
+                </form>
+
+            </div>
+            <div class="card-footer text-center bg-light">
+                <small>¿No Tienes una Cuenta? Crear Una <a href="{% url 'login' %}">Ingrese aquí</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

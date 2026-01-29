@@ -1,0 +1,92 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-0">Sala de Guerra</h1>
+        <p class="text-muted">Métricas de rendimiento de {{ request.user.username|title }}</p>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+        ⬅️ Volver al Tablero
+    </a>
+</div>
+
+<div class="row">
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-white fw-bold">Distribución de Misiones</div>
+            <div class="card-body">
+                <canvas id="estadoChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-white fw-bold">Estadísticas Clave</div>
+            <div class="card-body">
+                <h2 class="display-4 text-center mb-4 fw-bold">{{ total_general }} <small class="fs-6 text-muted">Misiones Totales</small></h2>
+                
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>🟡 Pendientes</span>
+                        <span class="badge bg-warning text-dark rounded-pill">{{ total_pendientes }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>🔵 En Proceso</span>
+                        <span class="badge bg-primary rounded-pill">{{ total_proceso }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>🟢 Completadas</span>
+                        <span class="badge bg-success rounded-pill">{{ total_completadas }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>⚫ Canceladas</span>
+                        <span class="badge bg-secondary rounded-pill">{{ total_canceladas }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('estadoChart').getContext('2d');
+    
+    const estadoChart = new Chart(ctx, {
+        type: 'doughnut', // Tipo de gráfico: 'doughnut', 'pie', 'bar'
+        data: {
+            labels: ['Pendientes', 'En Proceso', 'Completadas', 'Canceladas'],
+            datasets: [{
+                label: 'Cantidad de Misiones',
+                data: [
+                    {{ total_pendientes }}, 
+                    {{ total_proceso }}, 
+                    {{ total_completadas }}, 
+                    {{ total_canceladas }}
+                ],
+                backgroundColor: [
+                    '#ffc107', // Amarillo (Pendiente)
+                    '#0d6efd', // Azul (Proceso)
+                    '#198754', // Verde (Completada)
+                    '#6c757d'  // Gris (Cancelada)
+                ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card border-danger shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">⚠️ Confirmar Eliminación</h4>
+            </div>
+            <div class="card-body text-center p-5">
+                <h5 class="card-title text-muted mb-4">Está a punto de eliminar la operación:</h5>
+                <h2 class="fw-bold mb-4">"{{ tarea.titulo }}"</h2>
+                
+                <p class="alert alert-warning">
+                    Esta acción es irreversible, Comandante. Todos los datos de esta misión, 
+                    incluidos los colaboradores y avances, serán borrados permanentemente.
+                </p>
+
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    
+                    <div class="d-grid gap-2 d-md-block mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-secondary btn-lg px-4">Cancelar</a>
+                        <input type="submit" value="Confirmar Destrucción" class="btn btn-danger btn-lg px-4">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
