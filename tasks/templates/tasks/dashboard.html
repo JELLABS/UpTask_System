@@ -4,7 +4,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="mb-0">Sala de Guerra</h1>
+        <h1 class="mb-0">Estado de Tareas</h1>
         <p class="text-muted">Métricas de rendimiento de {{ request.user.username|title }}</p>
     </div>
     <a href="{% url 'home' %}" class="btn btn-outline-secondary">
@@ -16,7 +16,7 @@
     
     <div class="col-md-6 mb-4">
         <div class="card shadow h-100">
-            <div class="card-header bg-white fw-bold">Distribución de Misiones</div>
+            <div class="card-header bg-white fw-bold">Distribución de Tareas</div>
             <div class="card-body">
                 <canvas id="estadoChart"></canvas>
             </div>
@@ -62,7 +62,7 @@
         data: {
             labels: ['Pendientes', 'En Proceso', 'Completadas', 'Canceladas'],
             datasets: [{
-                label: 'Cantidad de Misiones',
+                label: 'Cantidad de Tareas',
                 data: [
                     {{ total_pendientes }}, 
                     {{ total_proceso }}, 

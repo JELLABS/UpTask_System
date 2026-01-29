@@ -8,9 +8,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
 from django.core.paginator import Paginator
-
+from django.http import JsonResponse
 from .models import Tarea, HistorialAvance, Perfil
 from .forms import TareaForm, HistorialForm, PerfilUpdateForm, EtiquetaForm
+from django.contrib.auth.models import User
+
 
 # ==========================================================
 # VISTAS DE NAVEGACIÓN
@@ -249,3 +251,40 @@ def exportar_csv(request):
         ])
 
     return response
+
+# 2. AGREGAR AL FINAL: LA API DE BÚSQUEDA
+@login_required
+def buscar_usuarios(request):
+    # Capturamos lo que el usuario escribe (Ej: "Juan")
+    query = request.GET.get('q', '')
+
+    # REGLA DE SEGURIDAD: 
+    # Si escribe menos de 2 letras, no encendemos el radar (ahorra recursos y privacidad)
+    if not query or len(query) < 2:
+        return JsonResponse([], safe=False)
+
+    # BÚSQUEDA TÁCTICA:
+    # Buscamos por Nombre de Usuario O Email.
+    # Excluimos al propio general (request.user)
+    # Limitamos a 5 resultados (Para que no puedan "pescar" toda la base)
+    usuarios = User.objects.filter(
+        Q(username__icontains=query) | Q(email__icontains=query)
+    ).exclude(id=request.user.id).distinct()[:5]
+
+    # EMPAQUETADO DE DATOS (JSON):
+    resultados = []
+    for u in usuarios:
+        # Obtenemos la foto si tiene perfil
+        foto_url = '/media/default.jpg' # Por defecto
+        if hasattr(u, 'perfil') and u.perfil.imagen:
+            foto_url = u.perfil.imagen.url
+
+        resultados.append({
+            'id': u.id,
+            'username': u.username,
+            'text': f"@{u.username}", # Lo que se verá en la lista
+            'foto': foto_url
+        })
+
+    # Enviamos el paquete de inteligencia
+    return JsonResponse(resultados, safe=False)
