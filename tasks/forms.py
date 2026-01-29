@@ -52,6 +52,18 @@ class HistorialForm(forms.ModelForm):
             'archivo': forms.ClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
         }
 
+# tasks/forms.py
+
+class EtiquetaForm(forms.ModelForm):
+    class Meta:
+        model = Etiqueta
+        fields = ['nombre', 'color']
+        
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Urgente, Ventas...'}),
+            'color': forms.Select(attrs={'class': 'form-select'}),
+        }
+
 class PerfilUpdateForm(forms.ModelForm):
     class Meta:
         model = Perfil

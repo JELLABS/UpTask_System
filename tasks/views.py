@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 from .models import Tarea, HistorialAvance, Perfil
-from .forms import TareaForm, HistorialForm, PerfilUpdateForm
+from .forms import TareaForm, HistorialForm, PerfilUpdateForm, EtiquetaForm
 
 # ==========================================================
 # VISTAS DE NAVEGACIÓN
@@ -69,6 +69,22 @@ def dashboard(request):
 # ==========================================================
 # VISTAS CRUD (ACTUALIZADAS PARA ETIQUETAS)
 # ==========================================================
+@login_required
+def crear_etiqueta(request):
+    if request.method == 'POST':
+        form = EtiquetaForm(request.POST)
+        if form.is_valid():
+            etiqueta = form.save(commit=False)
+            etiqueta.usuario = request.user # Asignamos al creador
+            etiqueta.save()
+            # Redirigimos directo a crear tarea para que la use
+            return redirect('crear_tarea') 
+    else:
+        form = EtiquetaForm()
+
+    contexto = {'form': form}
+    return render(request, 'tasks/crear_etiqueta.html', contexto)
+
 
 @login_required
 def crear_tarea(request):

@@ -12,4 +12,5 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'), # <--- Nueva ruta para el perfil
     path('signup/', views.signup, name='signup'), # <--- ESTA ES LA CLAVE PARA ARREGLAR EL ERROR
     path('exportar/', views.exportar_csv, name='exportar_csv'), # <--- Ruta para exportar tareas a CSV
+    path('crear-etiqueta/', views.crear_etiqueta, name='crear_etiqueta'), # <--- Ruta para crear etiqueta
 ]
