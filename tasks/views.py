@@ -298,3 +298,11 @@ def exportar_csv(request):
             mision.avance or "0%"
         ])
     return response
+
+def landing_page(request):
+    # Si el usuario ya está logueado, quizás queramos mandarlo directo al dashboard
+    # Si prefiere que vean la landing igual, borre las siguientes 2 líneas:
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
+    return render(request, 'tasks/landing.html')

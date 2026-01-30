@@ -2,21 +2,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from tasks import views # Importante: Importar las vistas aquí también
+from tasks import views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # RUTA RAÍZ (Vacía): Apunta directo al Dashboard
-    path('', views.dashboard, name='root_dashboard'),
+    # --- CAMBIO AQUÍ: La raíz ahora apunta a la Landing Page ---
+    path('', views.landing_page, name='landing'),
     
-    # INCLUIR LAS RUTAS DE TASKS (Para que funcionen /tablero/, /dashboard/, etc.)
+    # Incluimos las URLs de la app (que tienen /dashboard, /tablero, etc.)
     path('', include('tasks.urls')),
     
-    # AUTENTICACIÓN (Login/Logout)
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 
-# Configuración para ver imágenes en modo DEBUG
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
