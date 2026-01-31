@@ -3,29 +3,69 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Reportar en: "{{ tarea.titulo }}"</h4>
+        <div class="card shadow-sm border-0">
+            <div class="card-header text-white fw-bold d-flex justify-content-between align-items-center
+                {% if tarea.estado == 'COMPLETADA' %}bg-success
+                {% elif tarea.estado == 'EN_PROCESO' %}bg-primary
+                {% else %}bg-secondary{% endif %}">
+                
+                <span><i class="bi bi-journal-plus me-2"></i>Reportar: "{{ tarea.titulo }}"</span>
+                <span class="badge bg-light text-dark">{{ tarea.get_estado_display }}</span>
             </div>
-            <div class="card-body p-4">
+            
+            <div class="card-body p-4 bg-light">
                 
                 <form method="POST" action="" enctype="multipart/form-data">
                     {% csrf_token %}
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Comentario / Bitácora</label>
-                        {{ form.comentario }}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-primary">📝 Historial / Comentario</label>
+                                {{ form.comentario }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-success">💸 Gasto ($)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">$</span>
+                                        {{ form.monto }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">📎 Evidencia</label>
+                                    {{ form.archivo }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">📎 Adjuntar Archivo (Opcional)</label>
-                        {{ form.archivo }}
-                        <div class="form-text">Puede subir imágenes, PDFs o documentos Excel.</div>
+                    <div class="card mb-4 border-warning shadow-sm">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <label class="form-label fw-bold mb-0 text-dark">
+                                    <i class="bi bi-arrow-repeat me-1"></i>¿Actualizar Estado de la Misión?
+                                </label>
+                                <div class="form-text small">Cambie el estado si el reporte lo amerita.</div>
+                            </div>
+                            <div style="width: 200px;">
+                                {{ form.nuevo_estado }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancelar</a>
-                        <button type="submit" class="btn btn-success">Guardar Reporte</button>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        
+                        {% if tarea.proyecto %}
+                            <a href="{% url 'detalle_proyecto' tarea.proyecto.id %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        {% else %}
+                            <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        {% endif %}
+                        
+                        <button type="submit" class="btn btn-success fw-bold px-4">
+                            <i class="bi bi-send-fill me-2"></i>Enviar Informe
+                        </button>
                     </div>
 
                 </form>

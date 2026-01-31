@@ -4,62 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2502/2502699.png" type="image/png">
-    <title>UpTask | Centro de Mando</title>
+    <title>UpTask | Gestor de Tareas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; letter-spacing: 1px; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
-                <i class="bi bi-shield-check me-2"></i>UpTask
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}"><i class="bi bi-shield-check me-2"></i>UpTask</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             
             {% if user.is_authenticated %}
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'home' %}">
-                            <i class="bi bi-kanban"></i> Tablero de Tareas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">
-                            <i class="bi bi-graph-up"></i> Estadísticas
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-kanban"></i> Tareas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'lista_proyectos' %}"><i class="bi bi-folder-fill"></i> Proyectos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-graph-up"></i> Stats</a></li>
                 </ul>
-
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item me-4">
-                        <a href="{% url 'crear_tarea' %}" class="btn btn-success btn-sm shadow-sm fw-bold">
-                            <i class="bi bi-plus-lg"></i> Nueva Tarea
-                        </a>
-                    </li>
-
-                    <li class="nav-item me-2 text-white small d-none d-lg-block">
-                        Manager: <strong>{{ user.username }}</strong>
-                    </li>
+                    <li class="nav-item me-3"><a href="{% url 'crear_tarea' %}" class="btn btn-success btn-sm fw-bold">+ Tarea</a></li>
+                    <li class="nav-item me-3"><a href="{% url 'crear_proyecto' %}" class="btn btn-primary btn-sm fw-bold">+ Proyecto</a></li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle p-0" href="#" role="button" data-bs-toggle="dropdown">
-                            <img src="{{ user.perfil.imagen.url }}" class="rounded-circle border border-2 border-secondary" style="width: 35px; height: 35px; object-fit: cover;">
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" href="{% url 'perfil' %}">Mi Perfil</a></li>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"> Usuario: {{ user.username }}</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{% url 'logout' %}" class="px-2">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger w-100">Cerrar Sesión</button>
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">Salir</button>
                                 </form>
                             </li>
                         </ul>
@@ -71,19 +49,23 @@
     </nav>
 
     <div class="container pb-5">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}
-        {% endblock content %}
+        {% block content %}{% endblock content %}
     </div>
 
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: "{% if message.tags == 'danger' %}error{% else %}success{% endif %}",
+                    title: "{{ message }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

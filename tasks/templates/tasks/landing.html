@@ -4,146 +4,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UpTask | Gestión de Proyectos Simplificada</title>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2502/2502699.png" type="image/png">
-    
+    <title>UpTask | Gestión Inteligente de Proyectos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #ffffff; color: #333; }
+        
+        /* Tipografía y Color */
+        h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -0.5px; }
+        .text-primary-brand { color: #0d6efd; }
+        
+        /* Hero Section - Estilo Corporativo Moderno */
         .hero-section {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-            color: white;
-            padding: 100px 0;
-            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 120px 0 80px 0;
+            position: relative;
         }
-        .feature-icon {
-            font-size: 2.5rem;
-            color: #0d6efd;
-            margin-bottom: 1rem;
-        }
-        .card-hover:hover {
-            transform: translateY(-5px);
+        
+        /* Tarjetas de Características */
+        .feature-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 2rem;
             transition: all 0.3s ease;
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+            background: white;
         }
-        .btn-light-cta {
-            background-color: white;
-            color: #0d6efd;
-            font-weight: bold;
-            padding: 12px 30px;
-            border-radius: 50px;
-            transition: all 0.3s;
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: transparent;
         }
-        .btn-light-cta:hover { background-color: #f8f9fa; transform: scale(1.05); }
+        .icon-box {
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Botones Comerciales */
+        .btn-cta {
+            padding: 12px 35px;
+            font-weight: 600;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .btn-primary { 
+            background-color: #0d6efd; 
+            border: none; 
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+        }
+        .btn-primary:hover { 
+            background-color: #0b5ed7; 
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-white border-bottom">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">
-                <i class="bi bi-shield-check me-2"></i>UpTask
+            <a class="navbar-brand fw-bold fs-4 d-flex align-items-center" href="#">
+                <i class="bi bi-layers-fill text-primary me-2"></i>UpTask
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm rounded-pill px-4">Ir a mi Tablero</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item me-3"><a class="nav-link fw-bold" href="{% url 'login' %}">Iniciar Sesión</a></li>
-                        <li class="nav-item">
-                            <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">Registrarse</a>
-                        </li>
-                    {% endif %}
-                </ul>
+            <div class="d-flex align-items-center">
+                <a href="{% url 'login' %}" class="btn btn-link text-decoration-none text-dark fw-semibold me-3">Iniciar Sesión</a>
+                <a href="{% url 'signup' %}" class="btn btn-dark fw-bold px-4 rounded-pill">Comenzar Gratis</a>
             </div>
         </div>
     </nav>
 
-    <header class="hero-section text-center mb-5">
+    <section class="hero-section text-center">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-3">Gestiona tus proyectos con claridad absoluta</h1>
-                    <p class="lead mb-5 opacity-75">
-                        UpTask transforma el caos en orden. Una plataforma diseñada para equipos que buscan eficiencia, seguimiento en tiempo real y resultados medibles.
+                <div class="col-lg-9">
+                    <div class="d-inline-flex align-items-center bg-white border rounded-pill px-3 py-1 mb-4 shadow-sm">
+                        <span class="badge bg-primary rounded-pill me-2">NUEVO</span>
+                        <small class="fw-semibold text-secondary">Control Financiero Integrado v3.0</small>
+                    </div>
+                    
+                    <h1 class="display-3 fw-bold mb-4 text-dark">
+                        Gestione Proyectos.<br> 
+                        <span class="text-primary-brand">Controle el Presupuesto.</span>
+                    </h1>
+                    
+                    <p class="lead text-muted mb-5 px-lg-5">
+                        La plataforma todo en uno para equipos que necesitan más que una lista de tareas. 
+                        Centralice la colaboración, visualice el progreso en tiempo real y asegure la rentabilidad de cada proyecto.
                     </p>
-                    <div class="d-flex justify-content-center gap-3">
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'dashboard' %}" class="btn btn-light-cta shadow-lg">
-                                <i class="bi bi-speedometer2 me-2"></i>Entrar al Sistema
-                            </a>
-                        {% else %}
-                            <a href="{% url 'signup' %}" class="btn btn-light-cta shadow-lg">
-                                Comienza Gratis Hoy
-                            </a>
-                            <a href="{% url 'login' %}" class="btn btn-outline-light rounded-pill px-4 py-2 mt-1">
-                                Ya tengo cuenta
-                            </a>
-                        {% endif %}
+                    
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-cta">
+                            Crear Cuenta Gratuita
+                        </a>
+                        <a href="#features" class="btn btn-outline-secondary btn-cta">
+                            <i class="bi bi-play-circle me-2"></i>Ver Demo
+                        </a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <section class="container py-5 mb-5">
-        <div class="row text-center mb-5">
-            <div class="col-12">
-                <h6 class="text-primary fw-bold text-uppercase ls-2">Funcionalidades</h6>
-                <h2 class="fw-bold">Todo lo que tu equipo necesita</h2>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 card-hover">
-                    <div class="card-body text-center">
-                        <i class="bi bi-kanban feature-icon"></i>
-                        <h4 class="fw-bold mb-3">Tableros Dinámicos</h4>
-                        <p class="text-muted">Visualiza el flujo de trabajo con un sistema de estados claro. Arrastra, suelta y prioriza tareas en segundos.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 card-hover">
-                    <div class="card-body text-center">
-                        <i class="bi bi-people-fill feature-icon"></i>
-                        <h4 class="fw-bold mb-3">Colaboración Total</h4>
-                        <p class="text-muted">Asigna responsables, comparte avances y mantén a todo el equipo alineado con notificaciones inteligentes.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 card-hover">
-                    <div class="card-body text-center">
-                        <i class="bi bi-graph-up-arrow feature-icon"></i>
-                        <h4 class="fw-bold mb-3">Métricas en Tiempo Real</h4>
-                        <p class="text-muted">Toma decisiones basadas en datos. Nuestro Dashboard te ofrece una visión 360° del rendimiento de tus proyectos.</p>
+                    
+                    <div class="mt-5 text-muted small">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i> Sin tarjeta de crédito
+                        <span class="mx-3">•</span>
+                        <i class="bi bi-check-circle-fill text-success me-1"></i> Configuración en 2 min
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="bg-light py-5">
-        <div class="container text-center">
-            <h2 class="fw-bold mb-4">¿Listo para elevar tu productividad?</h2>
-            <p class="text-muted mb-4">Únete a los equipos que ya están usando UpTask para cumplir sus objetivos.</p>
-            <a href="{% url 'signup' %}" class="btn btn-primary btn-lg rounded-pill px-5 shadow">Crear Cuenta Gratuita</a>
+    <section id="features" class="py-5 bg-white">
+        <div class="container py-5">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h6 class="text-primary fw-bold text-uppercase ls-1">Por qué elegir UpTask</h6>
+                    <h2 class="fw-bold display-6">Todo lo que su empresa necesita para escalar</h2>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-success-subtle text-success">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Rentabilidad en Tiempo Real</h4>
+                        <p class="text-muted">Asigne presupuestos a sus proyectos. Cada tarea y reporte descuenta automáticamente del saldo, permitiéndole detectar desviaciones antes de que ocurran.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-primary-subtle text-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Colaboración Centralizada</h4>
+                        <p class="text-muted">Unifique a su equipo. Asigne responsables, comparta archivos y mantenga la comunicación contextualizada dentro de cada tarea.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-warning-subtle text-warning">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Visibilidad Total</h4>
+                        <p class="text-muted">Tome decisiones basadas en datos. Dashboards interactivos con métricas de avance, etiquetas más usadas y alertas de vencimiento.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-info-subtle text-info">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Historial Inmutable</h4>
+                        <p class="text-muted">Registro detallado de cada movimiento. Sepa exactamente quién hizo qué, cuándo se completó y cuánto costó cada acción.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-secondary-subtle text-dark">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Roles y Permisos</h4>
+                        <p class="text-muted">Proteja la integridad de sus proyectos. Solo los líderes pueden editar parámetros críticos; los colaboradores se enfocan en la ejecución.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="icon-box bg-danger-subtle text-danger">
+                            <i class="bi bi-grid-1x2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Organización Flexible</h4>
+                        <p class="text-muted">Clasifique mediante Proyectos y Etiquetas personalizadas. Adapte la herramienta a su flujo de trabajo, no al revés.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <footer class="bg-white py-4 mt-5 border-top">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2026 UpTask Systems. Todos los derechos reservados.</p>
-            <small class="text-muted">Desarrollado con precisión y excelencia &copy @Jellabs.</small>
+    <section class="py-5 bg-light border-top border-bottom">
+        <div class="container">
+            <div class="row align-items-center text-center">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h2 class="fw-bold display-5 text-primary mb-0">+10k</h2>
+                    <p class="text-muted text-uppercase fw-semibold">Proyectos Gestionados</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h2 class="fw-bold display-5 text-dark mb-0">35%</h2>
+                    <p class="text-muted text-uppercase fw-semibold">Aumento de Productividad</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="fw-bold display-5 text-success mb-0">100%</h2>
+                    <p class="text-muted text-uppercase fw-semibold">Control de Costos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-white text-center">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="fw-bold mb-4">Optimice su flujo de trabajo hoy mismo</h2>
+                    <p class="lead text-muted mb-5">Únase a los líderes que ya están transformando la manera de trabajar con UpTask.</p>
+                    <a href="{% url 'signup' %}" class="btn btn-dark btn-lg btn-cta px-5 py-3 shadow-lg">
+                        Registrarse Gratis
+                    </a>
+                    <p class="mt-3 small text-muted">No se requiere tarjeta de crédito. Cancele cuando quiera.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white pt-5 pb-4 border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <a class="navbar-brand fw-bold fs-4 d-flex align-items-center mb-3" href="#">
+                        <i class="bi bi-layers-fill text-primary me-2"></i>UpTask
+                    </a>
+                    <p class="text-muted small">
+                        Plataforma líder en gestión de proyectos y control presupuestario para equipos modernos.
+                    </p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="fw-bold mb-3">Producto</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Características</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Precios</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Seguridad</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="fw-bold mb-3">Compañía</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Nosotros</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Blog</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="fw-bold mb-3">Legal</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Términos de Servicio</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Política de Privacidad</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-top pt-4 mt-4 text-center">
+                <p class="text-muted small mb-0">&copy; 2026 UpTask Jellabs Inc. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 

@@ -1,0 +1,102 @@
+{% extends 'tasks/main.html' %}
+{% block content %}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-4">
+        <h2 class="fw-bold mb-0"><i class="bi bi-folder-fill me-2"></i>Mis Proyectos</h2>
+    </div>
+    <div class="col-md-4">
+        <form method="GET" class="d-flex">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar proyecto..." value="{{ query|default:'' }}">
+                <button class="btn btn-outline-dark" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'crear_proyecto' %}" class="btn btn-primary fw-bold shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo Proyecto
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for proy in proyectos %}
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 hover-elite">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title fw-bold text-primary mb-0 text-truncate" style="max-width: 85%;">
+                        <a href="{% url 'detalle_proyecto' proy.id %}" class="text-decoration-none text-primary stretched-link">
+                            {{ proy.titulo }}
+                        </a>
+                    </h5>
+                    {% if proy.usuario == request.user %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="z-index: 2;">Manager</span>
+                    {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="z-index: 2;">Equipo</span>
+                    {% endif %}
+                </div>
+                
+                <p class="card-text text-muted small mb-3" style="min-height: 40px;">
+                    {{ proy.descripcion|truncatechars:80|default:"Sin descripción." }}
+                </p>
+
+                <div class="d-flex justify-content-between text-muted small mb-3">
+                    <span><i class="bi bi-list-task me-1"></i>{{ proy.tareas.count }} Tareas</span>
+                    <span><i class="bi bi-pie-chart me-1"></i>{{ proy.porcentaje_avance }}%</span>
+                </div>
+                <div class="progress" style="height: 5px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ proy.porcentaje_avance }}%"></div>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-white border-top-0 pt-0 pb-3 d-flex justify-content-between" style="z-index: 2; position: relative;">
+                <small class="text-muted align-self-center">
+                    <i class="bi bi-calendar me-1"></i>{{ proy.fecha_inicio|date:"d M" }}
+                </small>
+                
+                {% if proy.usuario == request.user %}
+                <div class="btn-group">
+                    <a href="{% url 'editar_proyecto' proy.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'eliminar_proyecto' proy.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-folder-x"></i></div>
+        <h3 class="text-muted fw-bold">Sin Proyectos Encontrados</h3>
+        <p class="text-muted">Reajuste la búsqueda o inicie una nueva operación.</p>
+        <a href="{% url 'crear_proyecto' %}" class="btn btn-primary mt-2">Crear Primer Proyecto</a>
+    </div>
+    {% endfor %}
+</div>
+
+{% if proyectos.has_other_pages %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center pagination-sm">
+        {% if proyectos.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ proyectos.previous_page_number }}&q={{ query }}">&laquo;</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ proyectos.number }}</span></li>
+        {% if proyectos.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ proyectos.next_page_number }}&q={{ query }}">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    /* Efecto hover suave para las tarjetas */
+    .hover-elite { transition: transform 0.2s, box-shadow 0.2s; }
+    .hover-elite:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important; }
+</style>
+{% endblock %}

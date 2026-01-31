@@ -5,45 +5,71 @@
 
 <div class="row mb-4">
     <div class="col-12">
-        <h2 class="fw-bold">📊 Panel de Control</h2>
-        <p class="text-muted">Inteligencia visual de tareas en tiempo real</p>
+        <h2 class="fw-bold">📊 Panel de Control & Finanzas</h2>
+        <p class="text-muted">Inteligencia visual operativa y presupuestaria.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-success text-white border-0 shadow h-100">
+            <div class="card-body">
+                <h6 class="opacity-75 text-uppercase">Presupuesto Global</h6>
+                <h2 class="fw-bold mb-0">${{ total_presupuesto }}</h2>
+                <small>Suma de todos los proyectos activos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white border-0 shadow h-100">
+            <div class="card-body">
+                <h6 class="opacity-75 text-uppercase">Gasto Total Realizado</h6>
+                <h2 class="fw-bold mb-0">${{ total_gastado }}</h2>
+                <small>Registro de Actividad</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white border-0 shadow h-100">
+            <div class="card-body">
+                <h6 class="opacity-75 text-uppercase">Saldo Disponible</h6>
+                <h2 class="fw-bold mb-0">${{ saldo_restante }}</h2>
+                <small>Liquidez operativa restante</small>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card bg-warning text-dark border-0 shadow h-100">
-            <div class="card-body position-relative overflow-hidden">
-                <h6 class="text-uppercase fw-bold opacity-75">Pendientes</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ total_pendientes }}</h1>
-                <i class="bi bi-exclamation-triangle position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+        <div class="card border-0 shadow-sm h-100 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted text-uppercase fw-bold">Pendientes</h6>
+                <h3 class="display-6 fw-bold text-warning">{{ total_pendientes }}</h3>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-primary text-white border-0 shadow h-100">
-            <div class="card-body position-relative overflow-hidden">
-                <h6 class="text-uppercase fw-bold opacity-75">En Progreso</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ total_proceso }}</h1>
-                <i class="bi bi-gear-wide-connected position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+        <div class="card border-0 shadow-sm h-100 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted text-uppercase fw-bold">En Proceso</h6>
+                <h3 class="display-6 fw-bold text-primary">{{ total_proceso }}</h3>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-info text-white border-0 shadow h-100">
-            <div class="card-body position-relative overflow-hidden">
-                <h6 class="text-uppercase fw-bold opacity-75 text-dark">En Revisión</h6>
-                <h1 class="display-4 fw-bold mb-0 text-dark">{{ total_revision }}</h1>
-                <i class="bi bi-eye position-absolute end-0 bottom-0 m-2 opacity-25 text-dark" style="font-size: 4rem;"></i>
+        <div class="card border-0 shadow-sm h-100 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted text-uppercase fw-bold">En Revisión</h6>
+                <h3 class="display-6 fw-bold text-info">{{ total_revision }}</h3>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white border-0 shadow h-100">
-            <div class="card-body position-relative overflow-hidden">
-                <h6 class="text-uppercase fw-bold opacity-75">Completadas</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ total_completadas }}</h1>
-                <i class="bi bi-check-circle position-absolute end-0 bottom-0 m-2 opacity-25" style="font-size: 4rem;"></i>
+        <div class="card border-0 shadow-sm h-100 bg-light">
+            <div class="card-body text-center">
+                <h6 class="text-muted text-uppercase fw-bold">Completadas</h6>
+                <h3 class="display-6 fw-bold text-success">{{ total_completadas }}</h3>
             </div>
         </div>
     </div>
@@ -53,7 +79,7 @@
     <div class="col-md-6 mb-3">
         <div class="card shadow border-0 h-100">
             <div class="card-header bg-white fw-bold">
-                🎯 Estado de las tareas
+                🎯 Estado de Actividades
             </div>
             <div class="card-body">
                 <canvas id="estadoChart"></canvas>
@@ -64,7 +90,7 @@
     <div class="col-md-6 mb-3">
         <div class="card shadow border-0 h-100">
             <div class="card-header bg-white fw-bold">
-                🏷️ Carga por Categoría (Top 5)
+                🏷️ Etiquetas Más Usadas
             </div>
             <div class="card-body">
                 {% if etiqueta_nombres %}
@@ -72,7 +98,7 @@
                 {% else %}
                     <div class="text-center py-5 text-muted">
                         <i class="bi bi-tags display-4"></i>
-                        <p class="mt-2">Sin datos de etiquetas aún.</p>
+                        <p class="mt-2">No hay datos de etiquetas.</p>
                     </div>
                 {% endif %}
             </div>
@@ -80,59 +106,168 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm border-0 bg-light">
-            <div class="card-body text-center p-4">
-                <h5 class="fw-bold">📋 Ver Tablero Completo</h5>
-                <a href="{% url 'home' %}" class="btn btn-outline-dark w-100 mt-2 stretched-link">Ir al Tablero</a>
+<div class="row mb-4">
+    
+    <div class="col-md-4 mb-3">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white border-bottom-0 fw-bold text-danger">
+                <i class="bi bi-alarm-fill me-2"></i>Tablero / Vencimientos (7 días)
+            </div>
+            <div class="list-group list-group-flush">
+                {% for v in vencimientos %}
+                    <a href="{% if v.usuario == request.user %}{% url 'editar_tarea' v.id %}{% else %}{% url 'reportar_avance' v.id %}{% endif %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h6 class="mb-1 text-truncate" style="max-width: 70%;">{{ v.titulo }}</h6>
+                            <small class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ v.fecha_objetivo|date:"d M" }}</small>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-person-circle"></i> {{ v.responsable.username|default:"Sin asignar" }}
+                        </small>
+                    </a>
+                {% empty %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-shield-check display-6 text-success opacity-50"></i>
+                        <p class="mt-2 small mb-0">Sin amenazas inminentes.</p>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm border-0 bg-light">
-            <div class="card-body text-center p-4">
-                <h5 class="fw-bold">🚀 Iniciar Nueva Tarea</h5>
-                <a href="{% url 'crear_tarea' %}" class="btn btn-success w-100 mt-2 stretched-link">+ Crear Tarea</a>
+
+    <div class="col-md-8 mb-3">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-white border-bottom-0 fw-bold text-primary">
+                <i class="bi bi-activity me-2"></i>Actividad Reciente del Equipo
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Usuario</th>
+                                <th>Historial / Actividad</th>
+                                <th>Tareas</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in ultimos_movimientos %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ mov.usuario.perfil.imagen.url }}" class="rounded-circle me-2 border" width="30" height="30" style="object-fit:cover;">
+                                        <span class="fw-bold small">{{ mov.usuario.username }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted small d-block text-truncate" style="max-width: 250px;">{{ mov.comentario }}</span>
+                                    {% if mov.monto > 0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle py-0">Gastó: ${{ mov.monto }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reportar_avance' mov.tarea.id %}" class="text-decoration-none fw-bold small">
+                                        {{ mov.tarea.titulo|truncatechars:20 }}
+                                    </a>
+                                </td>
+                                <td class="text-muted small">{{ mov.fecha|date:"d/m H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Sin movimientos recientes.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-table me-2"></i>Estado de los Proyectos </span>
+                <a href="{% url 'lista_proyectos' %}" class="btn btn-sm btn-outline-light">Ver Todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Proyecto</th>
+                                <th>Avance</th>
+                                <th>Presupuesto</th>
+                                <th>Ejecutado</th>
+                                <th>Disponible</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in detalle_proyectos %}
+                            <tr>
+                                <td class="ps-4 fw-bold">
+                                    <a href="{% url 'detalle_proyecto' item.info.id %}" class="text-decoration-none text-dark">
+                                        {{ item.info.titulo }}
+                                    </a>
+                                </td>
+                                <td style="width: 20%;">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar {% if item.avance == 100 %}bg-success{% else %}bg-primary{% endif %}" 
+                                             role="progressbar" style="width: {{ item.avance }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ item.avance }}%</small>
+                                </td>
+                                <td class="text-muted">${{ item.info.presupuesto }}</td>
+                                <td class="text-danger fw-bold">${{ item.gastado }}</td>
+                                <td>
+                                    {% if item.restante < 0 %}
+                                        <span class="text-danger fw-bold">⚠️ ${{ item.restante }}</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold">${{ item.restante }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.avance == 100 %}
+                                        <span class="badge bg-success">Completado</span>
+                                    {% elif item.restante < 0 %}
+                                        <span class="badge bg-danger">Sobrepresupuesto</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">En Curso</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center py-3">No hay proyectos activos.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
-    // --- 1. GRÁFICO DE ESTADOS (DONA) ---
+    // 1. ESTADOS
     const ctxEstado = document.getElementById('estadoChart').getContext('2d');
     new Chart(ctxEstado, {
         type: 'doughnut',
         data: {
-            labels: ['Pendiente', 'En Espera', 'En Proceso', 'En Revisión', 'Completada'],
+            labels: ['Pendiente', 'Proceso', 'Revisión', 'Completada'],
             datasets: [{
-                data: [
-                    {{ total_pendientes }}, 
-                    {{ total_espera }},
-                    {{ total_proceso }}, 
-                    {{ total_revision }},
-                    {{ total_completadas }}
-                ],
-                backgroundColor: [
-                    '#ffc107', // Amarillo (Pendiente)
-                    '#6c757d', // Gris (Espera)
-                    '#0d6efd', // Azul (Proceso)
-                    '#0dcaf0', // Celeste (Revisión)
-                    '#198754'  // Verde (Completada)
-                ],
-                borderWidth: 1
+                data: [{{ total_pendientes }}, {{ total_proceso }}, {{ total_revision }}, {{ total_completadas }}],
+                backgroundColor: ['#ffc107', '#0d6efd', '#0dcaf0', '#198754'],
+                borderWidth: 0
             }]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
+        options: { cutout: '70%', responsive: true }
     });
 
-    // --- 2. GRÁFICO DE ETIQUETAS (BARRAS) ---
+    // 2. ETIQUETAS (Ahora sí funciona)
     {% if etiqueta_nombres %}
     const ctxEtiqueta = document.getElementById('etiquetaChart').getContext('2d');
     new Chart(ctxEtiqueta, {
@@ -140,21 +275,16 @@
         data: {
             labels: {{ etiqueta_nombres|safe }},
             datasets: [{
-                label: 'Cantidad de Misiones',
+                label: 'Tareas',
                 data: {{ etiqueta_cantidades|safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Azul transparente
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                backgroundColor: '#0d6efd',
+                borderRadius: 5
             }]
         },
         options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            },
-            plugins: {
-                legend: { display: false }
-            }
+            indexAxis: 'y',
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+            plugins: { legend: { display: false } }
         }
     });
     {% endif %}

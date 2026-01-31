@@ -1,0 +1,114 @@
+{% extends 'tasks/main.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white"><h4 class="mb-0">{{ titulo }}</h4></div>
+            <div class="card-body bg-light">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Nombre del Proyecto</label>
+                        {{ form.titulo }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Descripción</label>
+                        {{ form.descripcion }}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold text-success">💰 Presupuesto ($)</label>
+                            {{ form.presupuesto }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Inicio</label>
+                            {{ form.fecha_inicio }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Fin Estimado</label>
+                            {{ form.fecha_fin }}
+                        </div>
+                    </div>
+
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">👥 Asignar Equipo del Proyecto</label>
+                        <div style="display:none;">{{ form.equipo }}</div> <div id="equipo-seleccionado" class="d-flex flex-wrap gap-2 mb-2"></div>
+                        
+                        <div class="position-relative">
+                            <input type="text" id="buscador-equipo" class="form-control" placeholder="🔍 Buscar usuarios para el equipo..." autocomplete="off">
+                            <div id="resultados-equipo" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none;"></div>
+                        </div>
+                        <div class="form-text">Solo los usuarios agregados aquí podrán ser asignados a las tareas de este proyecto.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'lista_proyectos' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary fw-bold">Guardar Operación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputEq = document.getElementById('buscador-equipo');
+    const resultsEq = document.getElementById('resultados-equipo');
+    const displayEq = document.getElementById('equipo-seleccionado');
+    const selectEq = document.getElementById('id_equipo');
+
+    // Cargar iniciales
+    Array.from(selectEq.options).forEach(opt => { if(opt.selected) addBadge(opt.value, opt.text); });
+
+    inputEq.addEventListener('input', function(e) {
+        if(e.target.value.length < 2) { resultsEq.style.display='none'; return; }
+        fetch('/api/buscar-usuarios/?q=' + e.target.value)
+            .then(r => r.json())
+            .then(data => {
+                resultsEq.innerHTML = '';
+                if(data.length){
+                    resultsEq.style.display = 'block';
+                    data.forEach(u => {
+                        let b = document.createElement('button');
+                        b.className = 'list-group-item list-group-item-action';
+                        b.innerHTML = `<b>@${u.username}</b>`;
+                        b.type='button';
+                        b.onclick = () => { selectUser(u); };
+                        resultsEq.appendChild(b);
+                    });
+                } else { resultsEq.style.display='none'; }
+            });
+    });
+
+    function selectUser(u) {
+        let opt = selectEq.querySelector(`option[value="${u.id}"]`);
+        if(!opt) { opt = new Option(u.username, u.id); selectEq.add(opt); }
+        opt.selected = true;
+        addBadge(u.id, u.username);
+        inputEq.value = ''; resultsEq.style.display='none';
+    }
+
+    function addBadge(id, name) {
+        if(document.querySelector(`.badge-eq[data-id="${id}"]`)) return;
+        let s = document.createElement('span');
+        s.className = 'badge bg-primary p-2 badge-eq d-flex align-items-center gap-2';
+        s.setAttribute('data-id', id);
+        s.innerHTML = `${name} <span style="cursor:pointer" onclick="removeUser('${id}')">&times;</span>`;
+        displayEq.appendChild(s);
+    }
+
+    window.removeUser = function(id) {
+        let opt = selectEq.querySelector(`option[value="${id}"]`);
+        if(opt) opt.selected = false;
+        document.querySelector(`.badge-eq[data-id="${id}"]`).remove();
+    }
+    
+    document.addEventListener('click', e => { if(!inputEq.contains(e.target)) resultsEq.style.display='none'; });
+});
+</script>
+{% endblock %}

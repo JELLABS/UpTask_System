@@ -1,66 +1,99 @@
 from django import forms
+from django.db.models import Q 
 from django.contrib.auth.models import User
-from .models import Tarea, HistorialAvance, Perfil, Etiqueta
+from .models import Tarea, HistorialAvance, Perfil, Etiqueta, Proyecto
 
+# ======================================================
+# 1. FORMULARIO DE PROYECTOS
+# ======================================================
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+        fields = ['titulo', 'descripcion', 'presupuesto', 'fecha_inicio', 'fecha_fin', 'equipo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Proyecto'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'presupuesto': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
+            'fecha_inicio': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_fin': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
+            'equipo': forms.SelectMultiple(attrs={'style': 'display:none;'}),
+        }
+
+# ======================================================
+# 2. FORMULARIO DE TAREAS
+# ======================================================
 class TareaForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        # Capturamos el usuario que viene desde la vista
-        self.user = kwargs.pop('user', None)
-        super(TareaForm, self).__init__(*args, **kwargs)
-        
-        if self.user:
-            # FILTRO 1: Mostrar solo mis etiquetas
-            self.fields['etiquetas'].queryset = Etiqueta.objects.filter(usuario=self.user)
-            # FILTRO 2: No mostrarme a mí mismo en la lista de compartir
-            self.fields['compartida_con'].queryset = User.objects.exclude(id=self.user.id)
+    responsable = forms.ModelChoiceField(
+        queryset=User.objects.all(), 
+        required=False,
+        widget=forms.HiddenInput()
+    )
 
     class Meta:
         model = Tarea
-        fields = [
-            'titulo', 'descripcion', 'fecha_objetivo', 
-            'etiquetas', # <--- NUEVO CAMPO
-            'avance', 'estado', 'compartida_con', 
-            'observaciones'
-        ]
+        fields = ['titulo', 'descripcion', 'proyecto', 'costo', 'fecha_objetivo', 'estado', 'responsable', 'etiquetas', 'avance', 'observaciones', 'compartida_con']
         
         widgets = {
-            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Revisar inventario'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'proyecto': forms.Select(attrs={'class': 'form-select'}),
+            'costo': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Costo Estimado (Opcional)'}),
             'fecha_objetivo': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
-            'avance': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 50%, Falta firma...'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
-            
-            # Widget especial para etiquetas (Checkboxes horizontales)
-            'etiquetas': forms.CheckboxSelectMultiple(attrs={'class': 'list-unstyled d-flex gap-3 flex-wrap'}),
-            
-            # Widget para compartir (Select múltiple)
-            'compartida_con': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
+            'responsable': forms.HiddenInput(),
+            'avance': forms.TextInput(attrs={'class': 'form-control'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'etiquetas': forms.CheckboxSelectMultiple(),
+            'compartida_con': forms.SelectMultiple(attrs={'style': 'display:none;'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.proyecto_vinculado = kwargs.pop('proyecto_vinculado', None) 
+        super(TareaForm, self).__init__(*args, **kwargs)
+        self.fields['responsable'].queryset = User.objects.all()
+
+        if self.user:
+            self.fields['proyecto'].queryset = Proyecto.objects.filter(
+                Q(usuario=self.user) | Q(equipo=self.user)
+            ).distinct()
+
+        if self.proyecto_vinculado:
+            equipo_autorizado = User.objects.filter(
+                Q(id=self.proyecto_vinculado.usuario.id) | 
+                Q(proyectos_asignados=self.proyecto_vinculado)
+            ).distinct()
+            self.fields['responsable'].queryset = equipo_autorizado
+            self.fields['compartida_con'].queryset = equipo_autorizado
+            self.fields['proyecto'].initial = self.proyecto_vinculado
+
+# ======================================================
+# 3. FORMULARIO DE HISTORIAL (MEJORADO)
+# ======================================================
 class HistorialForm(forms.ModelForm):
+    # Campo extra: No se guarda en Historial, sirve para actualizar la Tarea
+    nuevo_estado = forms.ChoiceField(
+        choices=Tarea.ESTADOS, 
+        required=False, 
+        label="¿Actualizar Estado?",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = HistorialAvance
-        fields = ['comentario', 'archivo']
-        
+        fields = ['comentario', 'monto', 'archivo'] 
         widgets = {
-            'comentario': forms.Textarea(attrs={
-                'class': 'form-control', 
-                'rows': 2, 
-                'placeholder': 'Escriba el reporte de avance...'
-            }),
+            'comentario': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Describa el avance o gasto...'}),
+            'monto': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
             'archivo': forms.ClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
         }
-
-# tasks/forms.py
 
 class EtiquetaForm(forms.ModelForm):
     class Meta:
         model = Etiqueta
         fields = ['nombre', 'color']
-        
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Urgente, Ventas...'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'color': forms.Select(attrs={'class': 'form-select'}),
         }
 

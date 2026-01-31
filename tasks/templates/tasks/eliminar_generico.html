@@ -1,0 +1,35 @@
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card border-danger shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación</h4>
+            </div>
+            <div class="card-body text-center p-5">
+                <h5 class="card-title text-muted mb-4">Está a punto de eliminar el {{ tipo|lower }}:</h5>
+                
+                <h2 class="fw-bold mb-4">"{{ objeto.titulo }}"</h2>
+                
+                <p class="alert alert-warning">
+                    Esta acción es <strong>IRREVERSIBLE</strong>.<br>
+                    Si elimina este elemento, todos los datos asociados (archivos, historial, finanzas) 
+                    serán destruidos permanentemente.
+                </p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="d-grid gap-2 d-md-block mt-4">
+                        <a href="{% url cancel_url|default:'home' %}" class="btn btn-secondary btn-lg px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger btn-lg px-4">
+                            <i class="bi bi-trash-fill me-2"></i>Confirmar Destrucción
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -4,11 +4,11 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
+        <div class="card shadow border-0">
             <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">{{ titulo_pagina }}</h4>
+                <h4 class="mb-0 fw-bold"><i class="bi bi-clipboard-data me-2"></i>{{ titulo_pagina }}</h4>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4 bg-light">
                 
                 <form method="POST">
                     {% csrf_token %}
@@ -24,6 +24,25 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Descripción / Detalles</label>
                         {{ form.descripcion }}
+                    </div>
+
+                    <div class="card mb-3 border-primary shadow-sm">
+                        <div class="card-header bg-primary text-white py-1">
+                            <small class="fw-bold">📂 Asignación Estratégica</small>
+                        </div>
+                        <div class="card-body bg-white">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-bold">Proyecto Madre</label>
+                                    {{ form.proyecto }}
+                                    <div class="form-text small">Vincula esta tarea a un proyecto mayor.</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold text-success">💰 Costo Operativo</label>
+                                    {{ form.costo }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -43,50 +62,53 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label fw-bold mb-0">🏷️ Etiquetas (Marcadores)</label>
-                            
                             <a href="{% url 'crear_etiqueta' %}" class="btn btn-sm btn-outline-primary" style="font-size: 0.8rem;">
                                 + Crear Nueva
                             </a>
                         </div>
-
-                        <div class="p-3 bg-light border rounded">
+                        <div class="p-3 bg-white border rounded shadow-sm">
                             {% if form.etiquetas.field.queryset.count > 0 %}
                                 {{ form.etiquetas }}
                             {% else %}
-                                <p class="text-muted small mb-0">
-                                    ⚠️ No tiene etiquetas creadas. Haga clic en "+ Crear Nueva" arriba.
-                                </p>
+                                <p class="text-muted small mb-0">⚠️ No tiene etiquetas creadas.</p>
                             {% endif %}
                         </div>
-                        <div class="form-text small">Marque todas las etiquetas que correspondan a esta operación.</div>
                     </div>
 
                     <hr>
 
                     <div class="row">
+                        
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Reporte de Avance (Opcional)</label>
-                            {{ form.avance }}
+                            <label class="form-label fw-bold text-primary">👮‍♂️ Responsable Directo</label>
+                            
+                            {{ form.responsable }} <div id="responsable-seleccionado" class="mb-2"></div>
+
+                            <div class="position-relative">
+                                <input type="text" id="buscador-responsable" class="form-control" placeholder="🔍 Buscar Responsable (Uno solo)..." autocomplete="off">
+                                <div id="resultados-responsable" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none;"></div>
+                            </div>
+                            <div class="form-text small">Escriba nombre o email.</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">👥 Compartir Tarea con:</label>
-                            
-                            <div style="display: none;">
-                                {{ form.compartida_con }}
-                            </div>
+                            <label class="form-label fw-bold">Reporte de Avance Inicial</label>
+                            {{ form.avance }}
+                        </div>
+                    </div>
 
-                            <div id="lista-seleccionados" class="d-flex flex-wrap gap-2 mb-2">
-                                </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">👥 Colaboradores (Apoyo):</label>
+                            
+                            <div style="display: none;">{{ form.compartida_con }}</div>
+
+                            <div id="colaboradores-seleccionados" class="d-flex flex-wrap gap-2 mb-2"></div>
 
                             <div class="position-relative">
-                                <input type="text" id="buscador-usuarios" class="form-control" placeholder="🔍 Escriba nombre o email (@Juan...)" autocomplete="off">
-                                
-                                <div id="resultados-busqueda" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none;">
-                                    </div>
+                                <input type="text" id="buscador-colaboradores" class="form-control" placeholder="🔍 Buscar Colaboradores (Múltiples)..." autocomplete="off">
+                                <div id="resultados-colaboradores" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none;"></div>
                             </div>
-                            
-                            <div class="form-text small">Use el buscador para encontrar colaboradores específicos.</div>
                         </div>
                     </div>
 
@@ -97,7 +119,7 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancelar</a>
-                        <button type="submit" class="btn btn-success">Guardar Tarea</button>
+                        <button type="submit" class="btn btn-success fw-bold">Guardar Misión</button>
                     </div>
 
                 </form>
@@ -108,114 +130,138 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const inputBuscador = document.getElementById('buscador-usuarios');
-    const listaResultados = document.getElementById('resultados-busqueda');
-    const listaSeleccionados = document.getElementById('lista-seleccionados');
-    const selectOculto = document.getElementById('id_compartida_con'); // ID generado por Django
+    
+    // VARIABLES DE COMANDO
+    // Recibimos el ID del proyecto si existe, para filtrar búsquedas
+    const PROYECTO_ACTUAL_ID = "{{ proyecto_id|default:'' }}";
+    const API_URL = '/api/buscar-usuarios/?q=';
 
-    // 1. FUNCIÓN: CARGAR USUARIOS PREVIOS (Si estamos editando)
-    // Recorremos el select oculto para ver quiénes ya estaban seleccionados
-    Array.from(selectOculto.options).forEach(option => {
+    // ELEMENTOS DEL DOM
+    const inputResp = document.getElementById('buscador-responsable');
+    const resultsResp = document.getElementById('resultados-responsable');
+    const displayResp = document.getElementById('responsable-seleccionado');
+    const hiddenResp = document.getElementById('id_responsable'); 
+
+    const inputColab = document.getElementById('buscador-colaboradores');
+    const resultsColab = document.getElementById('resultados-colaboradores');
+    const displayColab = document.getElementById('colaboradores-seleccionados');
+    const selectColab = document.getElementById('id_compartida_con'); 
+
+    // --- A. CARGA INICIAL (EDICIÓN) ---
+    
+    // 1. Responsable
+    {% if responsable_inicial %}
+        seleccionarResponsable({
+            id: "{{ responsable_inicial.id }}",
+            text: "{{ responsable_inicial.text }}"
+        });
+    {% endif %}
+
+    // 2. Colaboradores
+    Array.from(selectColab.options).forEach(option => {
         if (option.selected) {
-            agregarBadgeVisual(option.value, option.text);
+            agregarBadgeColaborador(option.value, option.text);
         }
     });
 
-    // 2. FUNCIÓN: ESCUCHAR EL RADAR (Typing)
-    inputBuscador.addEventListener('input', function(e) {
-        const query = e.target.value;
-        
+    // --- B. RADAR RESPONSABLE ---
+    inputResp.addEventListener('input', function(e) {
+        buscarUsuarios(e.target.value, resultsResp, function(user) {
+            seleccionarResponsable(user);
+        });
+    });
+
+    function seleccionarResponsable(user) {
+        hiddenResp.value = user.id;
+        displayResp.innerHTML = `
+            <span class="badge bg-dark text-white p-2 d-inline-flex align-items-center gap-2">
+                <i class="bi bi-star-fill text-warning"></i> ${user.text}
+                <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="eliminarResponsable()"></i>
+            </span>
+        `;
+        inputResp.value = '';
+        resultsResp.style.display = 'none';
+    }
+
+    window.eliminarResponsable = function() {
+        hiddenResp.value = '';
+        displayResp.innerHTML = '';
+    };
+
+    // --- C. RADAR COLABORADORES ---
+    inputColab.addEventListener('input', function(e) {
+        buscarUsuarios(e.target.value, resultsColab, function(user) {
+            seleccionarColaborador(user);
+        });
+    });
+
+    function seleccionarColaborador(user) {
+        let option = selectColab.querySelector(`option[value="${user.id}"]`);
+        if (!option) {
+            option = new Option(user.text, user.id);
+            selectColab.add(option);
+        }
+        if (option.selected) return; 
+        option.selected = true;
+        agregarBadgeColaborador(user.id, user.text);
+        inputColab.value = '';
+        resultsColab.style.display = 'none';
+    }
+
+    function agregarBadgeColaborador(id, nombre) {
+        if (document.querySelector(`.badge-colab[data-id="${id}"]`)) return;
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-secondary badge-colab d-flex align-items-center gap-2 p-2';
+        badge.innerHTML = `${nombre} <span role="button" class="text-white fw-bold">&times;</span>`;
+        badge.setAttribute('data-id', id);
+        badge.querySelector('span').addEventListener('click', function() {
+            const option = selectColab.querySelector(`option[value="${id}"]`);
+            if (option) option.selected = false;
+            badge.remove();
+        });
+        displayColab.appendChild(badge);
+    }
+
+    // --- D. MOTOR DE BÚSQUEDA INTELIGENTE (FILTRA POR PROYECTO) ---
+    function buscarUsuarios(query, container, onSelectCallback) {
         if (query.length < 2) {
-            listaResultados.style.display = 'none';
+            container.style.display = 'none';
             return;
         }
 
-        // Llamada a la API (Ajax)
-        fetch(`/api/buscar-usuarios/?q=${query}`)
+        // AGREGAMOS EL FILTRO DE PROYECTO SI EXISTE
+        let urlCompleta = API_URL + query;
+        if (PROYECTO_ACTUAL_ID) {
+            urlCompleta += "&pid=" + PROYECTO_ACTUAL_ID;
+        }
+
+        fetch(urlCompleta)
             .then(response => response.json())
             .then(data => {
-                listaResultados.innerHTML = ''; // Limpiar anteriores
-                
+                container.innerHTML = '';
                 if (data.length > 0) {
-                    listaResultados.style.display = 'block';
+                    container.style.display = 'block';
                     data.forEach(user => {
-                        // Crear elemento de lista
-                        const item = document.createElement('button');
-                        item.type = 'button'; // Importante para no enviar formulario
-                        item.className = 'list-group-item list-group-item-action d-flex align-items-center gap-2';
-                        
-                        // Diseño del item (Foto + Texto)
-                        item.innerHTML = `
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-2';
+                        btn.innerHTML = `
                             <img src="${user.foto}" class="rounded-circle border" width="25" height="25" style="object-fit:cover;">
                             <span>${user.text}</span>
                         `;
-
-                        // Al hacer clic en un resultado
-                        item.addEventListener('click', () => {
-                            seleccionarUsuario(user.id, user.text);
-                            inputBuscador.value = ''; // Limpiar buscador
-                            listaResultados.style.display = 'none'; // Ocultar lista
-                        });
-
-                        listaResultados.appendChild(item);
+                        btn.addEventListener('click', () => onSelectCallback(user));
+                        container.appendChild(btn);
                     });
                 } else {
-                    listaResultados.style.display = 'none';
+                    container.style.display = 'none';
                 }
             });
-    });
-
-    // 3. FUNCIÓN: SELECCIONAR (Logística Backend + Visual)
-    function seleccionarUsuario(id, nombre) {
-        // A. Backend: Marcar en el select oculto
-        let option = selectOculto.querySelector(`option[value="${id}"]`);
-        
-        // Si la opción no existe (porque Django filtra), la creamos dinámicamente
-        if (!option) {
-            option = new Option(nombre, id);
-            selectOculto.add(option);
-        }
-        
-        // Evitar duplicados
-        if (option.selected) return;
-
-        option.selected = true;
-
-        // B. Frontend: Crear Badge visual
-        agregarBadgeVisual(id, nombre);
     }
 
-    // 4. FUNCIÓN: DIBUJAR BADGE (Visual)
-    function agregarBadgeVisual(id, nombre) {
-        // Verificar visualmente que no esté duplicado
-        if (document.querySelector(`.badge[data-id="${id}"]`)) return;
-
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-primary d-flex align-items-center gap-2 p-2 m-1'; // m-1 para separación
-        badge.innerHTML = `
-            ${nombre}
-            <span role="button" class="text-white fw-bold ms-1" style="cursor: pointer;">&times;</span>
-        `;
-        badge.setAttribute('data-id', id);
-
-        // Al hacer clic en la X (Eliminar)
-        badge.querySelector('span').addEventListener('click', function() {
-            // Desmarcar del select oculto
-            const option = selectOculto.querySelector(`option[value="${id}"]`);
-            if (option) option.selected = false;
-            
-            // Eliminar visualmente
-            badge.remove();
-        });
-
-        listaSeleccionados.appendChild(badge);
-    }
-
-    // Cerrar lista si hago clic fuera
+    // Cerrar al hacer clic fuera
     document.addEventListener('click', function(e) {
-        if (!inputBuscador.contains(e.target) && !listaResultados.contains(e.target)) {
-            listaResultados.style.display = 'none';
-        }
+        if (!inputResp.contains(e.target)) resultsResp.style.display = 'none';
+        if (!inputColab.contains(e.target)) resultsColab.style.display = 'none';
     });
 });
 </script>
