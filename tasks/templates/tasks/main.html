@@ -22,9 +22,11 @@
             {% if user.is_authenticated %}
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-kanban"></i> Tareas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'lista_proyectos' %}"><i class="bi bi-folder-fill"></i> Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-graph-up"></i> Stats</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-kanban"></i> Gestión de Tareas</a></li>
+                    
+                    <li class="nav-item"><a class="nav-link" href="{% url 'lista_proyectos' %}"><i class="bi bi-briefcase-fill"></i> Portafolio de Proyectos</a></li>
+                    
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-bar-chart-line-fill"></i> Inteligencia de Negocio</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item me-3"><a href="{% url 'crear_tarea' %}" class="btn btn-success btn-sm fw-bold">+ Tarea</a></li>
