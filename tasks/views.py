@@ -152,8 +152,19 @@ def dashboard(request):
     total_revision = mis_misiones.filter(estado='EN_REVISION').count()
     total_espera = mis_misiones.filter(estado='EN_ESPERA').count()
 
-    # 3. GRÁFICO ETIQUETAS
-    etiquetas_data = Etiqueta.objects.filter(usuario=request.user).annotate(num_tareas=Count('tareas')).order_by('-num_tareas')[:5]
+    # CORRECCIÓN DE ETIQUETAS (INTELIGENCIA DE USO REAL)
+    # =========================================================
+    # Antes: Buscaba solo las creadas por el usuario (ERROR)
+    # Ahora: Busca etiquetas presentes en 'mis_misiones', sin importar quién las creó.
+    
+    etiquetas_data = Etiqueta.objects.filter(
+        tareas__in=mis_misiones
+    ).annotate(
+        # Contamos cuántas veces aparece esta etiqueta SOLO en mis misiones
+        num_uso=Count('tareas', filter=Q(tareas__in=mis_misiones))
+    ).order_by('-num_uso').distinct()[:5]
+    
+    # =========================================================
     
     # 4. FINANZAS GLOBALES (Solo Proyectos Propios)
     proyectos_propios = Proyecto.objects.filter(usuario=request.user)
@@ -197,7 +208,7 @@ def dashboard(request):
         
         # Gráficos
         'etiqueta_nombres': [e.nombre for e in etiquetas_data],
-        'etiqueta_cantidades': [e.num_tareas for e in etiquetas_data],
+        'etiqueta_cantidades': [e.num_uso for e in etiquetas_data],
         
         # Finanzas
         'total_presupuesto': total_presupuesto,
