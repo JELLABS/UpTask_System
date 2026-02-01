@@ -238,7 +238,7 @@ def crear_tarea(request):
                     fail_silently=True
                 )
 
-            messages.success(request, 'Misión creada.')
+            messages.success(request, 'Tarea creada.')
             if t.proyecto: return redirect('detalle_proyecto', pk=t.proyecto.id)
             return redirect('home')
     else:

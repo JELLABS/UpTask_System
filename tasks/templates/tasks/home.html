@@ -41,7 +41,7 @@
             <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Buscar operación por título...">
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control border-start-0 ps-0" placeholder="Buscar tarea por título...">
                     <button class="btn btn-dark" type="submit">Buscar</button>
                 </div>
             </div>
@@ -224,7 +224,7 @@
                             {% for user in mision.compartida_con.all %}
                                 <span class="badge bg-secondary me-1"><i class="bi bi-person me-1"></i>{{ user.username }}</span>
                             {% empty %}
-                                <small class="text-muted fst-italic">Misión individual (Privada)</small>
+                                <small class="text-muted fst-italic">Tarea individual (Privada)</small>
                             {% endfor %}
                         </div>
 
@@ -264,7 +264,7 @@
                             {% empty %}
                                 <div class="text-center py-4 text-muted opacity-75">
                                     <i class="bi bi-chat-square-quote display-6"></i>
-                                    <p class="mt-2 small">Sin actividad registrada en la actividad.</p>
+                                    <p class="mt-2 small">Sin actividad registrada en historial de la tarea.</p>
                                 </div>
                             {% endfor %}
                         </div>

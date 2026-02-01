@@ -9,8 +9,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-    </style>
+    body { 
+        background-color: #f8f9fa; 
+        font-family: 'Segoe UI', sans-serif; 
+    }
+
+    /* =========================================
+       🛡️ ESCUDO ANTI-OUTLOOK (ROMPE-LÍNEAS)
+       ========================================= */
+    
+    /* Obliga a CUALQUIER elemento de texto a respetar el ancho de la pantalla */
+    p, h1, h2, h3, h4, h5, h6, span, div, li, td, th, small, .card-body {
+        overflow-wrap: anywhere !important;  /* Rompe urls o textos largos donde sea */
+        word-break: break-word !important;   /* Rompe palabras unidas por espacios duros */
+        white-space: normal !important;      /* Permite el salto de línea natural */
+        max-width: 100%;                     /* Nunca superar el ancho del padre */
+    }
+
+    /* Manejo especial para Tablas copiadas */
+    table {
+        width: 100% !important;
+        table-layout: fixed !important; /* Fuerza a las celdas a obedecer */
+    }
+</style>
 </head>
 <body>
 

@@ -149,3 +149,7 @@ LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# En settings.py (solo si sigue fallando, pero usualmente Nginx es el único culpable)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520 # 20MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520 # 20MB
