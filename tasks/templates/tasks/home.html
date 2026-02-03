@@ -46,12 +46,29 @@
                 </div>
             </div>
 
-            <div class="col-md-7 d-flex flex-wrap justify-content-end align-items-center gap-2">
-                <div class="btn-group btn-group-sm shadow-sm" role="group">
-                    <a href="?filter=&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-secondary {% if status_filter == '' %}active bg-secondary text-white{% endif %}">Todas</a>
-                    <a href="?filter=PENDIENTE&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-warning text-dark {% if status_filter == 'PENDIENTE' %}active bg-warning{% endif %}">Pendientes</a>
-                    <a href="?filter=EN_PROCESO&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-primary {% if status_filter == 'EN_PROCESO' %}active bg-primary text-white{% endif %}">En Proceso</a>
-                    <a href="?filter=COMPLETADA&search={{ search_query }}&ownership={{ ownership_filter }}" class="btn btn-outline-success {% if status_filter == 'COMPLETADA' %}active bg-success text-white{% endif %}">Completadas</a>
+                <div class="d-flex flex-wrap gap-2 mb-4 align-items-center justify-content-between">
+                    
+                    <div class="btn-group shadow-sm">
+                        <a href="?filter=" class="btn btn-outline-secondary {% if not status_filter %}active fw-bold{% endif %}">Todas</a>
+                        <a href="?filter=PENDIENTE" class="btn btn-outline-secondary {% if status_filter == 'PENDIENTE' %}active fw-bold{% endif %}">Pendientes</a>
+                        <a href="?filter=EN_PROCESO" class="btn btn-outline-secondary {% if status_filter == 'EN_PROCESO' %}active fw-bold{% endif %}">En Proceso</a>
+                        <a href="?filter=COMPLETADA" class="btn btn-outline-secondary {% if status_filter == 'COMPLETADA' %}active fw-bold{% endif %}">Completadas</a>
+                    </div>
+
+                    <div class="btn-group shadow-sm">
+                        <a href="?filter=retrasadas" class="btn btn-outline-danger {% if status_filter == 'retrasadas' %}active fw-bold{% endif %}" title="Vencidas y sin completar">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Retrasadas
+                        </a>
+                        
+                        <a href="?filter=hoy" class="btn btn-outline-success {% if status_filter == 'hoy' %}active fw-bold{% endif %}" title="Vencen hoy">
+                            <i class="bi bi-calendar-check-fill me-1"></i>Hoy
+                        </a>
+                        
+                        <a href="?filter=proximas" class="btn btn-outline-primary {% if status_filter == 'proximas' %}active fw-bold{% endif %}" title="Futuras">
+                            <i class="bi bi-calendar-plus me-1"></i>Próximas
+                        </a>
+                    </div>
+
                 </div>
 
                 <div class="btn-group btn-group-sm shadow-sm" role="group">
