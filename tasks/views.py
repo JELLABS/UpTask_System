@@ -441,8 +441,15 @@ def landing_page(request):
     if request.user.is_authenticated: return redirect('dashboard')
     return render(request, 'tasks/landing.html')
 
-
 @login_required
 def detalle_tarea(request, pk):
     tarea = get_object_or_404(Tarea, pk=pk)
-    return render(request, 'tasks/detalle_tarea.html', {'tarea': tarea})
+    
+    # --- CORRECCIÓN AQUÍ ---
+    # Usamos '-fecha' porque así se llama el campo en su base de datos
+    bitacoras = HistorialAvance.objects.filter(tarea=tarea).order_by('-fecha')
+    
+    return render(request, 'tasks/detalle_tarea.html', {
+        'tarea': tarea, 
+        'bitacoras': bitacoras 
+    })
