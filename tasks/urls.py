@@ -18,6 +18,7 @@ urlpatterns = [
     path('crear-etiqueta/', views.crear_etiqueta, name='crear_etiqueta'),
     path('editar-tarea/<int:pk>/', views.editar_tarea, name='editar_tarea'),
     path('eliminar-tarea/<int:pk>/', views.eliminar_tarea, name='eliminar_tarea'),
+    path('tarea/<int:pk>/detalle/', views.detalle_tarea, name='detalle_tarea'),
     
     # 4. ACCIONES
     path('cambiar-estado/<int:pk>/<str:nuevo_estado>/', views.cambiar_estado, name='cambiar_estado'),

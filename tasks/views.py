@@ -122,42 +122,42 @@ def eliminar_proyecto(request, pk):
 # --- DASHBOARD & OPERACIONES ---
 # tasks/views.py
 
+# tasks/views.py
+
 @login_required
 def home(request):
-    # 1. Base: Mis tareas y las compartidas
+    # 1. Base de operaciones
     misiones = Tarea.objects.filter(
         Q(usuario=request.user) | 
         Q(compartida_con=request.user) | 
         Q(responsable=request.user)
     ).distinct()
     
-    # 2. Captura de parámetros
+    # 2. Captura de parámetros (AHORA SON INDEPENDIENTES)
     search = request.GET.get('search', '')
-    status = request.GET.get('filter', '') # Aquí recibimos la orden (hoy, retrasadas, etc.)
+    status_filter = request.GET.get('status', '') # Antes era 'filter', ahora 'status'
+    time_filter = request.GET.get('time', '')     # Nuevo canal para tiempo
     ownership = request.GET.get('ownership', '')
     
-    hoy = timezone.now().date() # Fecha actual del servidor
+    hoy = timezone.now().date()
 
-    # 3. Filtro de Búsqueda (Texto)
+    # 3. Filtro de Búsqueda
     if search:
         misiones = misiones.filter(titulo__icontains=search)
     
-    # 4. FILTROS DE ESTADO Y TIEMPO (LA MEJORA)
-    if status == 'retrasadas':
-        # Vencidas (fecha < hoy) Y que NO estén completadas
+    # 4. APLICACIÓN DE FILTROS CRUZADOS (Uno no anula al otro)
+    
+    # A) Filtro de Estado
+    if status_filter:
+        misiones = misiones.filter(estado=status_filter)
+
+    # B) Filtro de Tiempo
+    if time_filter == 'retrasadas':
         misiones = misiones.filter(fecha_objetivo__lt=hoy).exclude(estado='COMPLETADA')
-    
-    elif status == 'hoy':
-        # Exactamente para hoy
+    elif time_filter == 'hoy':
         misiones = misiones.filter(fecha_objetivo=hoy)
-    
-    elif status == 'proximas':
-        # Futuro (fecha > hoy)
+    elif time_filter == 'proximas':
         misiones = misiones.filter(fecha_objetivo__gt=hoy)
-        
-    elif status: 
-        # Si no es de tiempo, asumimos que es un estado normal (PENDIENTE, EN_PROCESO, etc.)
-        misiones = misiones.filter(estado=status)
 
     # 5. Filtro de Propiedad
     if ownership == 'mis_tareas':
@@ -165,7 +165,7 @@ def home(request):
     elif ownership == 'compartidas':
         misiones = misiones.filter(compartida_con=request.user)
     
-    # 6. Ordenamiento: Primero las urgentes (Vencidas/Hoy), luego por fecha
+    # 6. Ordenamiento y Paginación
     misiones = misiones.annotate(
         orden_estado=Case(
             When(estado='COMPLETADA', then=Value(3)),
@@ -174,14 +174,15 @@ def home(request):
         )
     ).order_by('orden_estado', 'fecha_objetivo')
     
-    # Paginación
     paginator = Paginator(misiones, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
     
+    # Pasamos ambas variables al template para mantener los botones activos
     return render(request, 'tasks/home.html', {
         'misiones': page_obj, 
         'search_query': search, 
-        'status_filter': status, 
+        'status_filter': status_filter, 
+        'time_filter': time_filter, # <--- Enviamos esto al HTML
         'ownership_filter': ownership, 
         'hoy': hoy
     })
@@ -439,3 +440,9 @@ def exportar_csv(request):
 def landing_page(request):
     if request.user.is_authenticated: return redirect('dashboard')
     return render(request, 'tasks/landing.html')
+
+
+@login_required
+def detalle_tarea(request, pk):
+    tarea = get_object_or_404(Tarea, pk=pk)
+    return render(request, 'tasks/detalle_tarea.html', {'tarea': tarea})
