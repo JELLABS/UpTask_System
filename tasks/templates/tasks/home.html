@@ -115,7 +115,7 @@
                         {% endif %}
 
                         {% if mision.usuario != request.user %}
-                            <span class="badge bg-light text-muted border" title="Creador"><i class="bi bi-person-plus me-1"></i>{{ mision.usuario.username }}</span>
+                            <span class="badge bg-light text-muted border" title="Manager"><i class="bi bi-person-plus me-1"></i>{{ mision.usuario.username }}</span>
                         {% endif %}
 
                         {% if mision.responsable %}
@@ -186,7 +186,7 @@
                             <div class="col-md-6 border-end">
                                 <p class="mb-2"><i class="bi bi-calendar-check text-success me-2"></i><strong>Objetivo:</strong> {{ mision.fecha_objetivo|date:"d/m/Y" }}</p>
                                 <p class="mb-2"><i class="bi bi-flag-checkered text-danger me-2"></i><strong>Cierre:</strong> {{ mision.fecha_cierre|default:"--" }}</p>
-                                <p class="mb-0"><i class="bi bi-person-badge text-primary me-2"></i><strong>Creador:</strong> {{ mision.usuario.username }}</p>
+                                <p class="mb-0"><i class="bi bi-person-badge text-primary me-2"></i><strong>Manager:</strong> {{ mision.usuario.username }}</p>
                                 <p class="mb-0"><i class="bi bi-star-fill text-warning me-2"></i><strong>Responsable:</strong> {{ mision.responsable.username|default:"Sin asignar" }}</p>
                             </div>
                             <div class="col-md-6 ps-4">
@@ -204,7 +204,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <h6 class="fw-bold text-secondary text-uppercase small"><i class="bi bi-justify-left me-1"></i>Descripción de la Misión</h6>
+                            <h6 class="fw-bold text-secondary text-uppercase small"><i class="bi bi-justify-left me-1"></i>Descripción de la Tarea</h6>
                             <div class="bg-light p-3 rounded border-start border-4 border-primary text-secondary">
                                 {{ mision.descripcion|linebreaks|default:"Sin descripción detallada." }}
                             </div>
@@ -290,7 +290,7 @@
             <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-clipboard-check"></i></div>
             <h3 class="text-muted fw-bold">Sin Tareas Activas</h3>
             <p class="text-muted">El tablero está limpio, Comandante.</p>
-            <a href="{% url 'crear_tarea' %}" class="btn btn-primary mt-3">Crear Primera Misión</a>
+            <a href="{% url 'crear_tarea' %}" class="btn btn-primary mt-3">Crear Primera Tarea</a>
         </div>
     {% endfor %}
 </div>

@@ -20,15 +20,19 @@ from .forms import TareaForm, HistorialForm, PerfilUpdateForm, EtiquetaForm, Pro
 def buscar_usuarios(request):
     query = request.GET.get('q', '')
     proyecto_id = request.GET.get('pid', None)
+    
     if not query or len(query) < 2: return JsonResponse([], safe=False)
 
-    # Buscamos usuarios
-    usuarios = User.objects.filter(Q(username__icontains=query) | Q(email__icontains=query))
+    # --- CORRECCIÓN AQUÍ: .exclude(is_superuser=True) ---
+    usuarios = User.objects.filter(
+        Q(username__icontains=query) | Q(email__icontains=query)
+    ).exclude(is_superuser=True) # <--- El Superusuario se vuelve invisible
     
-    # Si estamos en contexto de proyecto, filtramos por el equipo
+    # Si estamos en contexto de proyecto...
     if proyecto_id:
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-        # Filtro: Dueño + Equipo asignado
+        # Aquí también podríamos filtrar, pero el filtro principal ya lo sacó.
+        # Solo aseguramos que mostramos al dueño (si no es superuser) y al equipo.
         usuarios = usuarios.filter(Q(id=proyecto.usuario.id) | Q(proyectos_asignados=proyecto))
 
     usuarios = usuarios.distinct()[:5]
@@ -47,7 +51,7 @@ def buscar_usuarios(request):
 @login_required
 def lista_proyectos(request):
     proyectos = Proyecto.objects.filter(Q(usuario=request.user) | Q(equipo=request.user)).distinct().order_by('-creado_el')
-    query = request.GET.get('q')
+    query = request.GET.get('q') or ""
     if query: proyectos = proyectos.filter(Q(titulo__icontains=query) | Q(descripcion__icontains=query))
     
     paginator = Paginator(proyectos, 6)
