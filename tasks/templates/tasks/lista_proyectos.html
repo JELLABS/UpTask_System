@@ -2,19 +2,48 @@
 {% block content %}
 
 <div class="row mb-4 align-items-center">
-    <div class="col-md-4">
-        <h2 class="fw-bold mb-0"><i class="bi bi-folder-fill me-2"></i>Mis Proyectos</h2>
+    
+    <div class="col-md-3">
+        <h2 class="fw-bold mb-0"><i class="bi bi-folder-fill me-2"></i>Proyectos</h2>
     </div>
-    <div class="col-md-4">
-        <form method="GET" class="d-flex">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar proyecto..." value="{{ query|default:'' }}">
-                <button class="btn btn-outline-dark" type="submit">Buscar</button>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-2">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <form method="GET" class="d-flex">
+                            {% if status_filter %}
+                                <input type="hidden" name="status" value="{{ status_filter }}">
+                            {% endif %}
+                            
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                                <input type="text" name="q" class="form-control border-start-0" 
+                                       placeholder="Buscar..." value="{{ query|default:'' }}">
+                                <button class="btn btn-outline-secondary" type="submit">Ir</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-md-6 d-flex justify-content-end">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="?status={% if query %}&q={{ query }}{% endif %}" 
+                               class="btn btn-outline-secondary {% if not status_filter %}active fw-bold{% endif %}">Todos</a>
+                            
+                            <a href="?status=activos{% if query %}&q={{ query }}{% endif %}" 
+                               class="btn btn-outline-primary {% if status_filter == 'activos' %}active fw-bold{% endif %}">En Curso</a>
+                            
+                            <a href="?status=completados{% if query %}&q={{ query }}{% endif %}" 
+                               class="btn btn-outline-success {% if status_filter == 'completados' %}active fw-bold{% endif %}">Listos</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
-    <div class="col-md-4 text-end">
+
+    <div class="col-md-3 text-end">
         <a href="{% url 'crear_proyecto' %}" class="btn btn-primary fw-bold shadow-sm">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Proyecto
         </a>
@@ -26,45 +55,57 @@
     <div class="col-md-4">
         <div class="card h-100 shadow-sm border-0 hover-elite">
             <div class="card-body">
+                
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="card-title fw-bold text-primary mb-0 text-truncate" style="max-width: 85%;">
+                    <h5 class="card-title fw-bold text-primary mb-0 text-truncate" style="max-width: 75%;">
                         <a href="{% url 'detalle_proyecto' proy.id %}" class="text-decoration-none text-primary stretched-link">
                             {{ proy.titulo }}
                         </a>
                     </h5>
-                    {% if proy.usuario == request.user %}
-                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="z-index: 2;">Manager</span>
-                    {% else %}
-                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="z-index: 2;">Equipo</span>
-                    {% endif %}
+                    
+                    <span class="badge rounded-pill 
+                        {% if proy.estado == 'COMPLETADA' %}bg-success
+                        {% elif proy.estado == 'CANCELADO' %}bg-danger
+                        {% else %}bg-light text-dark border{% endif %}">
+                        {{ proy.get_estado_display }}
+                    </span>
                 </div>
                 
                 <p class="card-text text-muted small mb-3" style="min-height: 40px;">
                     {{ proy.descripcion|truncatechars:80|default:"Sin descripción." }}
                 </p>
 
-                <div class="d-flex justify-content-between text-muted small mb-3">
+                <div class="d-flex justify-content-between text-muted small mb-1">
                     <span><i class="bi bi-list-task me-1"></i>{{ proy.tareas.count }} Tareas</span>
-                    <span><i class="bi bi-pie-chart me-1"></i>{{ proy.porcentaje_avance }}%</span>
+                    <span>{{ proy.porcentaje_avance }}%</span>
                 </div>
                 <div class="progress" style="height: 5px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ proy.porcentaje_avance }}%"></div>
+                    <div class="progress-bar {% if proy.porcentaje_avance == 100 %}bg-success{% else %}bg-primary{% endif %}" 
+                         role="progressbar" style="width: {{ proy.porcentaje_avance }}%"></div>
                 </div>
             </div>
             
-            <div class="card-footer bg-white border-top-0 pt-0 pb-3 d-flex justify-content-between" style="z-index: 2; position: relative;">
-                <small class="text-muted align-self-center">
-                    <i class="bi bi-calendar me-1"></i>{{ proy.fecha_inicio|date:"d M" }}
-                </small>
+            <div class="card-footer bg-white border-top-0 pt-0 pb-3 d-flex justify-content-between align-items-center" style="z-index: 2; position: relative;">
+                
+                {% if proy.usuario == request.user %}
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Manager</span>
+                {% else %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle">Equipo</span>
+                {% endif %}
                 
                 {% if proy.usuario == request.user %}
                 <div class="btn-group">
-                    <a href="{% url 'editar_proyecto' proy.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                    <a href="{% url 'editar_proyecto' proy.id %}" class="btn btn-sm btn-outline-secondary border-0" title="Editar">
                         <i class="bi bi-pencil"></i>
                     </a>
-                    <a href="{% url 'eliminar_proyecto' proy.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                        <i class="bi bi-trash"></i>
-                    </a>
+                    
+                    <form id="form-eliminar-proy-{{ proy.id }}" action="{% url 'eliminar_proyecto' proy.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Eliminar" 
+                                onclick="confirmarEliminacion(event, 'form-eliminar-proy-{{ proy.id }}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
                 </div>
                 {% endif %}
             </div>
@@ -73,9 +114,13 @@
     {% empty %}
     <div class="col-12 text-center py-5">
         <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-folder-x"></i></div>
-        <h3 class="text-muted fw-bold">Sin Proyectos Encontrados</h3>
-        <p class="text-muted">Reajuste la búsqueda o inicie un nuevo proyecto.</p>
-        <a href="{% url 'crear_proyecto' %}" class="btn btn-primary mt-2">Crear Primer Proyecto</a>
+        <h3 class="text-muted fw-bold">Sin Proyectos</h3>
+        <p class="text-muted">No hay proyectos que coincidan con los filtros.</p>
+        {% if status_filter or query %}
+            <a href="{% url 'lista_proyectos' %}" class="btn btn-outline-secondary mt-2">Limpiar Filtros</a>
+        {% else %}
+            <a href="{% url 'crear_proyecto' %}" class="btn btn-primary mt-2">Crear Primer Proyecto</a>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
@@ -84,12 +129,18 @@
 <nav class="mt-5">
     <ul class="pagination justify-content-center pagination-sm">
         {% if proyectos.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ proyectos.previous_page_number }}&q={{ query }}">&laquo;</a></li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ proyectos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    &laquo;
+                </a>
+            </li>
         {% endif %}
+        
         <li class="page-item active"><span class="page-link">{{ proyectos.number }}</span></li>
+        
         {% if proyectos.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ proyectos.next_page_number }}{% if query %}&q={{ query }}{% endif %}">
+                <a class="page-link" href="?page={{ proyectos.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
                     Siguiente
                 </a>
             </li>
@@ -99,7 +150,6 @@
 {% endif %}
 
 <style>
-    /* Efecto hover suave para las tarjetas */
     .hover-elite { transition: transform 0.2s, box-shadow 0.2s; }
     .hover-elite:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important; }
 </style>

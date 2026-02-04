@@ -38,6 +38,16 @@ class Proyecto(models.Model):
     fecha_fin = models.DateField(null=True, blank=True)
     creado_el = models.DateTimeField(auto_now_add=True)
 
+    # --- AGREGUE ESTO DE NUEVO ---
+    ESTADOS = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_PROCESO', 'En Proceso'),
+        ('COMPLETADA', 'Completada'),
+        ('CANCELADO', 'Cancelado'),
+    ]
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='EN_PROCESO')
+    # -----------------------------
+
     def __str__(self):
         return self.titulo
 

@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from datetime import timedelta # <--- NECESARIO PARA EL RADAR DE FECHAS
 from .models import Tarea, HistorialAvance, Perfil, Etiqueta, Proyecto
-from .forms import TareaForm, HistorialForm, PerfilUpdateForm, EtiquetaForm, ProyectoForm
+from .forms import TareaForm, HistorialForm, PerfilUpdateForm, EtiquetaForm, ProyectoForm, UserUpdateForm
 
 # --- API BUSCADOR ---
 @login_required
@@ -48,15 +48,42 @@ def buscar_usuarios(request):
     return JsonResponse(resultados, safe=False)
 
 # --- GESTIÓN DE PROYECTOS ---
+# En tasks/views.py
+
 @login_required
 def lista_proyectos(request):
-    proyectos = Proyecto.objects.filter(Q(usuario=request.user) | Q(equipo=request.user)).distinct().order_by('-creado_el')
+    # 1. Base: Proyectos donde soy dueño o equipo
+    proyectos = Proyecto.objects.filter(
+        Q(usuario=request.user) | Q(equipo=request.user)
+    ).distinct().order_by('-creado_el')
+
+    # 2. Captura de Filtros
     query = request.GET.get('q') or ""
-    if query: proyectos = proyectos.filter(Q(titulo__icontains=query) | Q(descripcion__icontains=query))
-    
+    status_filter = request.GET.get('status')
+
+    # 3. Aplicar Filtro de Búsqueda (Texto)
+    if query:
+        proyectos = proyectos.filter(
+            Q(titulo__icontains=query) | Q(descripcion__icontains=query)
+        )
+
+    # 4. Aplicar Filtro de Estado (Botones)
+    if status_filter == 'activos':
+        # Muestra todo lo que NO esté terminado ni cancelado
+        proyectos = proyectos.exclude(estado__in=['COMPLETADA', 'CANCELADO'])
+    elif status_filter == 'completados':
+        proyectos = proyectos.filter(estado='COMPLETADA')
+    # Si es 'todos' o no hay filtro, no hacemos nada (pasa todo)
+
+    # 5. Paginación
     paginator = Paginator(proyectos, 6)
     page_obj = paginator.get_page(request.GET.get('page'))
-    return render(request, 'tasks/lista_proyectos.html', {'proyectos': page_obj, 'query': query})
+
+    return render(request, 'tasks/lista_proyectos.html', {
+        'proyectos': page_obj, 
+        'query': query,
+        'status_filter': status_filter # Pasamos el filtro para mantener el botón activo
+    })
 
 @login_required
 def crear_proyecto(request):
@@ -413,13 +440,30 @@ def reportar_avance(request, pk):
 
     return render(request, 'tasks/reportar_avance.html', {'form': form, 'tarea': tarea})
 
+# En tasks/views.py
+
 @login_required
 def perfil(request):
     if request.method == 'POST':
-        p = PerfilUpdateForm(request.POST, request.FILES, instance=request.user.perfil)
-        if p.is_valid(): p.save(); messages.success(request, 'Perfil actualizado.'); return redirect('perfil')
-    else: p = PerfilUpdateForm(instance=request.user.perfil)
-    return render(request, 'tasks/perfil.html', {'p_form': p})
+        # Instanciamos ambos formularios con los datos que llegan (POST y FILES)
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = PerfilUpdateForm(request.POST, request.FILES, instance=request.user.perfil)
+        
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Su ficha personal ha sido actualizada.')
+            return redirect('perfil')
+    else:
+        # Carga inicial de datos
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = PerfilUpdateForm(instance=request.user.perfil)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
+    return render(request, 'tasks/perfil.html', context)
 
 def signup(request):
     if request.method == 'POST':

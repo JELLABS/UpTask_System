@@ -52,14 +52,23 @@
                     </div>
 
                     <div class="bg-light p-4 rounded-3 mb-5 border-start border-4 border-primary">
-                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Descripción de la Orden</h6>
+                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Descripción de la tarea</h6>
                         <p class="mb-0 fs-5" style="white-space: pre-line;">{{ tarea.descripcion|default:"Sin descripción detallada." }}</p>
+                    </div>
+
+                    <div class="bg-light p-4 rounded-3 mb-5 border-start border-4 border-primary">
+                        <h6 class="text-uppercase small fw-bold mb-3" style="color: #07589e;">
+                            Observaciones especiales de la tarea
+                        </h6>
+                        <p class="mb-0 fs-5" style="white-space: pre-line;">
+                            {{ tarea.observaciones|default:"Sin observaciones." }}
+                        </p>
                     </div>
 
                     <div class="row g-4 mb-5">
                         <div class="col-md-4">
                             <div class="p-3 border rounded h-100">
-                                <small class="text-muted d-block mb-1">Responsable</small>
+                                <small class="text-danger d-block mb-1">Responsable</small>
                                 <div class="d-flex align-items-center">
                                     <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
                                         {{ tarea.responsable.username|first|upper|default:"?" }}
@@ -77,7 +86,7 @@
 
                         <div class="col-md-4">
                             <div class="p-3 border rounded h-100">
-                                <small class="text-muted d-block mb-1">Equipo de Apoyo</small>
+                                <small class="text-warning d-block mb-1">Colaboradores de Apoyo</small>
                                 {% if tarea.compartida_con.all %}
                                     <div class="avatar-group">
                                         {% for colab in tarea.compartida_con.all %}
@@ -102,98 +111,146 @@
                         {% endif %}
                     </div>
 
+                    <div class="bg-light p-4 rounded-3 mb-5 border-start border-4 border-primary">
+                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Avance de la tarea</h6>
+                        <p class="mb-0 fs-5" style="white-space: pre-line; color: #d40e0e;">{{ tarea.avance|default:"Sin avances registrados." }}</p>
+                    </div>
+
                 </div>
 
-                <div class="card-footer bg-light py-3 px-5 d-flex justify-content-end gap-2">
+                <div class="card-footer bg-light py-3 px-5 d-flex justify-content-end gap-2 align-items-center">
                     
-                    {% if tarea.estado != 'COMPLETADA' %}
-                    <form action="{% url 'editar_tarea' tarea.id %}" method="POST" class="d-inline">
-                        {% csrf_token %}
-                        </form>
-                    {% endif %}
-
                     {% if user == tarea.usuario or user in tarea.compartida_con.all %}
                         <a href="{% url 'editar_tarea' tarea.id %}" class="btn btn-primary px-4">
                             <i class="bi bi-pencil-square me-2"></i>Editar Misión
                         </a>
                     {% endif %}
+
+                    {% if user == tarea.usuario %}
+                        <form id="form-eliminar-tarea-{{ tarea.id }}" action="{% url 'eliminar_tarea' tarea.id %}" method="POST" class="d-inline ms-2">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-outline-danger px-3" title="Eliminar Misión"
+                                    onclick="confirmarEliminacion(event, 'form-eliminar-tarea-{{ tarea.id }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="mt-4 text-center">
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-clock-history"></i> Tarea creada el {{ tarea.fecha_creacion|date:"d/m/Y H:i" }}
+                </p>
+                
                 <p class="text-muted small">
-                    <i class="bi bi-clock-history"></i> Misión creada el {{ tarea.creada_el|date:"d/m/Y H:i" }}
+                    <i class="bi bi-hash"></i> Número de Operación: <strong>#{{ tarea.id }}</strong>
                 </p>
             </div>
 
         </div>
     </div>
 </div>
+
 <div class="row justify-content-center mt-4">
-        <div class="col-lg-10">
-            
-            <h4 class="mb-4 fw-bold text-gray-800">
-                <i class="bi bi-journal-text me-2"></i>Bitácora de Operaciones
-            </h4>
+    <div class="col-lg-10">
+        
+        <h4 class="mb-4 fw-bold text-gray-800">
+            <i class="bi bi-journal-text me-2"></i>Bitácora de comentarios y avances
+        </h4>
 
-            <div class="mb-4">
-                <a href="{% url 'reportar_avance' tarea.id %}" class="btn btn-outline-primary w-100 py-3 border-dashed">
-                    <i class="bi bi-plus-circle me-2"></i>Agregar nuevo reporte de avance
-                </a>
+        <div class="mb-3">
+            <a href="{% url 'reportar_avance' tarea.id %}" class="btn btn-outline-primary w-100 py-3 border-dashed">
+                <i class="bi bi-plus-circle me-2"></i>Agregar nuevo reporte de avance
+            </a>
+        </div>
+
+        <div class="mb-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       id="filtroBitacora" 
+                       class="form-control border-start-0 ps-0" 
+                       placeholder="Buscar en la conversación (usuario, mensaje, fecha)..."
+                       autocomplete="off">
             </div>
+        </div>
 
-            {% if bitacoras %}
-                <div class="timeline">
-                    {% for avance in bitacoras %}
-                    <div class="card mb-3 border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start">
-                                <div class="me-3">
-                                    <div class="bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" 
-                                         style="width: 45px; height: 45px; background: linear-gradient(45deg, #4e73df, #224abe);">
-                                        {{ avance.usuario.username|first|upper }}
-                                    </div>
+        {% if bitacoras %}
+            <div class="timeline">
+                {% for avance in bitacoras %}
+                <div class="card mb-3 border-0 shadow-sm bitacora-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" 
+                                     style="width: 45px; height: 45px; background: linear-gradient(45deg, #4e73df, #224abe);">
+                                    {{ avance.usuario.username|first|upper }}
+                                </div>
+                            </div>
+                            
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold text-dark">{{ avance.usuario.username }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> {{ avance.fecha|date:"d M Y - H:i" }}
+                                    </small>
                                 </div>
                                 
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="mb-0 fw-bold text-dark">{{ avance.usuario.username }}</h6>
-                                        <small class="text-muted">
-                                            <i class="bi bi-clock"></i> {{ avance.fecha|date:"d M Y - H:i" }}
-                                        </small>
-                                    </div>
-                                    
-                                    <div class="bg-light p-3 rounded mb-2">
-                                        <p class="mb-0 text-dark" style="white-space: pre-line;">{{ avance.comentario }}</p>
-                                    </div>
-
-                                    {% if avance.archivo %}
-                                    <div class="mt-2">
-                                        <a href="{{ avance.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                            <i class="bi bi-paperclip"></i> Ver Archivo Adjunto
-                                        </a>
-                                    </div>
-                                    {% endif %}
+                                <div class="bg-light p-3 rounded mb-2">
+                                    <p class="mb-0 text-dark" style="white-space: pre-line;">{{ avance.comentario }}</p>
                                 </div>
+
+                                {% if avance.archivo %}
+                                <div class="mt-2">
+                                    <a href="{{ avance.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-paperclip"></i> Ver Archivo Adjunto
+                                    </a>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-            {% else %}
-                <div class="alert alert-light text-center border-dashed py-5">
-                    <i class="bi bi-chat-square-dots display-4 text-muted mb-3"></i>
-                    <p class="text-muted">No hay registros en la bitácora aún.</p>
-                </div>
-            {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-light text-center border-dashed py-5">
+                <i class="bi bi-chat-square-dots display-4 text-muted mb-3"></i>
+                <p class="text-muted">No hay registros en la bitácora aún.</p>
+            </div>
+        {% endif %}
 
-        </div>
     </div>
-    
-    <style>
-        .border-dashed { border: 2px dashed #e3e6f0 !important; }
-        .bg-light-success { background-color: #e8f5e9; }
-    </style>
+</div>
 
-</div> 
+<style>
+    .border-dashed { border: 2px dashed #e3e6f0 !important; }
+    .bg-light-success { background-color: #e8f5e9; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('filtroBitacora');
+        const tarjetas = document.querySelectorAll('.bitacora-card');
+
+        if(input){
+            input.addEventListener('keyup', function(e) {
+                const termino = e.target.value.toLowerCase();
+
+                tarjetas.forEach(tarjeta => {
+                    const contenido = tarjeta.innerText.toLowerCase();
+                    if (contenido.includes(termino)) {
+                        tarjeta.style.display = 'block';
+                    } else {
+                        tarjeta.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+
 {% endblock %}

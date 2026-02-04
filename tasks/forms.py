@@ -101,3 +101,18 @@ class PerfilUpdateForm(forms.ModelForm):
     class Meta:
         model = Perfil
         fields = ['imagen']
+
+# En tasks/forms.py
+
+# ... (otras importaciones)
+
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
+        }
