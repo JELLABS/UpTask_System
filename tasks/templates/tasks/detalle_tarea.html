@@ -122,7 +122,7 @@
                     
                     {% if user == tarea.usuario or user in tarea.compartida_con.all %}
                         <a href="{% url 'editar_tarea' tarea.id %}" class="btn btn-primary px-4">
-                            <i class="bi bi-pencil-square me-2"></i>Editar Misión
+                            <i class="bi bi-pencil-square me-2"></i>Editar
                         </a>
                     {% endif %}
 
@@ -131,7 +131,7 @@
                             {% csrf_token %}
                             <button type="button" class="btn btn-outline-danger px-3" title="Eliminar Misión"
                                     onclick="confirmarEliminacion(event, 'form-eliminar-tarea-{{ tarea.id }}')">
-                                <i class="bi bi-trash"></i>
+                                <i class="bi bi-trash">Eliminar</i>
                             </button>
                         </form>
                     {% endif %}
@@ -156,7 +156,7 @@
     <div class="col-lg-10">
         
         <h4 class="mb-4 fw-bold text-gray-800">
-            <i class="bi bi-journal-text me-2"></i>Bitácora de comentarios y avances
+            <i class="bi bi-journal-text me-2"></i>Seccion de comentarios y avances
         </h4>
 
         <div class="mb-3">
@@ -219,7 +219,7 @@
         {% else %}
             <div class="alert alert-light text-center border-dashed py-5">
                 <i class="bi bi-chat-square-dots display-4 text-muted mb-3"></i>
-                <p class="text-muted">No hay registros en la bitácora aún.</p>
+                <p class="text-muted">No hay registros en la Seccion aún.</p>
             </div>
         {% endif %}
 

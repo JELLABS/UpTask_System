@@ -15,7 +15,7 @@
         {% if proyecto.usuario == request.user %}
             <a href="{% url 'editar_proyecto' proyecto.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
             <a href="{% url 'crear_tarea' %}?proyecto_id={{ proyecto.id }}" class="btn btn-success fw-bold shadow">
-                + Añadir Tarea
+                + Tarea
             </a>
         {% endif %}
     </div>
