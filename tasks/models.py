@@ -42,7 +42,7 @@ class Proyecto(models.Model):
     ESTADOS = [
         ('PENDIENTE', 'Pendiente'),
         ('EN_PROCESO', 'En Proceso'),
-        ('COMPLETADA', 'Completada'),
+        ('COMPLETADO', 'Completado'),
         ('CANCELADO', 'Cancelado'),
     ]
     estado = models.CharField(max_length=20, choices=ESTADOS, default='EN_PROCESO')
