@@ -9,7 +9,7 @@ from .models import Tarea, HistorialAvance, Perfil, Etiqueta, Proyecto
 class ProyectoForm(forms.ModelForm):
     class Meta:
         model = Proyecto
-        fields = ['titulo', 'descripcion', 'presupuesto', 'fecha_inicio', 'fecha_fin', 'equipo']
+        fields = ['titulo', 'descripcion', 'presupuesto', 'fecha_inicio', 'fecha_fin', 'equipo', 'estado']
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Proyecto'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -17,6 +17,7 @@ class ProyectoForm(forms.ModelForm):
             'fecha_inicio': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'fecha_fin': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'equipo': forms.SelectMultiple(attrs={'style': 'display:none;'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
         }
 
 # ======================================================
